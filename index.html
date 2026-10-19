@@ -2,178 +2,22 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0A2E4D">
 <title>ProcesVlot | Minder administratie, meer tijd voor je vak</title>
 <meta name="description" content="ProcesVlot automatiseert het papierwerk van kleine bedrijven: klantaanvragen, bonnetjes en offertes. Gratis kennismaking, vaste prijs vooraf.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ProcesVlot">
+<meta property="og:description" content="Minder administratie, meer tijd voor je vak. Wij automatiseren klantaanvragen, bonnetjes en offertes.">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 48'%3E%3Cpath d='M24.8 19.2A14 14 0 0 1 48.7 15' fill='none' stroke='%230F5FA8' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M24.8 28.8A14 14 0 1 0 51.2 19.2' fill='none' stroke='%2353B848' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M31 24l5.5 5L46 18' fill='none' stroke='%230A2E4D' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@600;700;800&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --ink:#0A2E4D;
-    --blue:#0F5FA8;
-    --blue-dark:#0B4C87;
-    --green:#53B848;
-    --green-dark:#3E9435;
-    --text:#24323D;
-    --muted:#566673;
-    --soft:#F4F6F7;
-    --line:#E1E6E9;
-    --white:#FFFFFF;
-  }
-  *{margin:0;padding:0;box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  body{
-    background:var(--white);
-    color:var(--text);
-    font-family:'Source Sans 3',system-ui,sans-serif;
-    font-size:18px;
-    line-height:1.6;
-  }
-  h1,h2,h3{
-    font-family:'Schibsted Grotesk',system-ui,sans-serif;
-    color:var(--ink);
-    line-height:1.15;
-    letter-spacing:-0.02em;
-  }
-  a{color:var(--blue);}
-  .wrap{max-width:1120px;margin:0 auto;padding:0 24px;}
-  section{padding:96px 0;scroll-margin-top:72px;}
-  h1,h2{text-wrap:balance;}
-  .soft{background:var(--soft);}
-
-  /* Knoppen */
-  .btn{
-    display:inline-block;
-    font:600 17px/1 'Source Sans 3',system-ui,sans-serif;
-    padding:15px 22px;
-    border-radius:8px;
-    text-decoration:none;
-    border:2px solid transparent;
-    cursor:pointer;
-    transition:background-color .15s;
-  }
-  .btn-primary{background:var(--blue);color:var(--white);}
-  .btn-primary:hover{background:var(--blue-dark);}
-  .btn-link{color:var(--ink);padding-left:4px;padding-right:4px;text-decoration:underline;text-underline-offset:4px;}
-  .btn-link:hover{color:var(--blue);}
-  :focus-visible{outline:3px solid var(--green);outline-offset:2px;}
-
-  /* Navigatie */
-  .nav{border-bottom:1px solid var(--line);background:var(--white);position:sticky;top:0;z-index:10;}
-  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:72px;gap:24px;}
-  .brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
-  .brand svg{width:44px;height:33px;}
-  .wordmark{font:800 22px/1 'Schibsted Grotesk',system-ui,sans-serif;color:var(--ink);letter-spacing:-0.03em;}
-  .wordmark span{color:var(--green-dark);}
-  .nav-links{display:flex;align-items:center;gap:28px;}
-  .nav-links a{color:var(--text);text-decoration:none;font-weight:600;font-size:16px;}
-  .nav-links a:hover{color:var(--blue);}
-  .nav-links .btn{color:var(--white);padding:11px 18px;font-size:16px;}
-
-  /* Hero */
-  .hero{padding:88px 0 96px;}
-  .hero-grid{display:grid;grid-template-columns:1.05fr 0.95fr;gap:64px;align-items:center;}
-  .hero h1{font-size:clamp(38px,5.4vw,62px);font-weight:800;margin-bottom:24px;}
-  .hero .lead{font-size:21px;color:var(--muted);max-width:30em;margin-bottom:36px;}
-  .hero-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;}
-  .promises{list-style:none;display:flex;flex-wrap:wrap;gap:8px 24px;margin-top:36px;color:var(--muted);font-size:16px;}
-  .promises li{display:flex;align-items:center;gap:8px;}
-  .promises svg{flex-shrink:0;}
-
-  /* Hero-voorbeeld: van appje naar overzicht */
-  .demo{border:1px solid var(--line);border-radius:12px;background:var(--white);overflow:hidden;box-shadow:0 1px 2px rgba(10,46,77,.06);}
-  .demo-chat{background:var(--soft);padding:24px;border-bottom:1px solid var(--line);}
-  .demo-label{font-size:14px;color:var(--muted);margin-bottom:10px;}
-  .bubble{background:#DCF3D8;border-radius:10px 10px 2px 10px;padding:10px 14px;margin-left:auto;max-width:260px;font-size:16px;}
-  .bubble .file{display:flex;align-items:center;gap:10px;font-weight:600;color:var(--ink);}
-  .bubble .file i{display:block;width:34px;height:42px;border-radius:4px;background:var(--white);border:1px solid #BFE3B9;position:relative;flex-shrink:0;}
-  .bubble .file i::after{content:'';position:absolute;left:7px;right:7px;top:9px;height:2px;background:#BFE3B9;box-shadow:0 6px 0 #BFE3B9,0 12px 0 #BFE3B9,0 18px 0 #BFE3B9;}
-  .bubble small{display:block;color:var(--muted);font-size:13px;text-align:right;margin-top:4px;}
-  .demo-table{padding:20px 24px 24px;}
-  .demo-table h3{font-size:17px;margin-bottom:12px;}
-  table{width:100%;border-collapse:collapse;font-size:16px;}
-  th{text-align:left;font-weight:600;color:var(--muted);font-size:14px;padding:6px 0;border-bottom:1px solid var(--line);}
-  td{padding:9px 0;border-bottom:1px solid var(--line);}
-  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;}
-  tr.new td{background:#EEF8EC;}
-  tr.new td:first-child{box-shadow:inset 3px 0 0 var(--green);padding-left:8px;}
-  .tag-new{display:inline-block;margin-left:8px;font-size:13px;font-weight:600;color:var(--green-dark);}
-  @media (prefers-reduced-motion:no-preference){
-    tr.new td{animation:rowIn .6s ease-out 1s both;}
-    @keyframes rowIn{from{opacity:0;}to{opacity:1;}}
-  }
-
-  /* Herken je dit */
-  .two-col{display:grid;grid-template-columns:0.9fr 1.1fr;gap:64px;align-items:start;}
-  h2{font-size:clamp(30px,3.6vw,42px);font-weight:800;margin-bottom:18px;}
-  .intro{color:var(--muted);font-size:19px;max-width:32em;}
-  .quotes{list-style:none;}
-  .quotes li{font-size:20px;color:var(--ink);padding:18px 0;border-bottom:1px solid var(--line);}
-  .quotes li:first-child{border-top:1px solid var(--line);}
-  .quotes-end{margin-top:24px;color:var(--muted);}
-
-  /* Wat we automatiseren */
-  .services{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin-top:48px;}
-  .service{border-top:3px solid var(--ink);padding-top:22px;}
-  .service:nth-child(2){border-top-color:var(--blue);}
-  .service:nth-child(3){border-top-color:var(--green);}
-  .service h3{font-size:23px;margin-bottom:10px;}
-  .service p{color:var(--muted);}
-
-  /* Werkwijze */
-  .steps{list-style:none;counter-reset:stap;display:grid;grid-template-columns:repeat(4,1fr);gap:32px;margin-top:48px;}
-  .steps li{counter-increment:stap;}
-  .steps li::before{content:counter(stap);display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:var(--ink);color:var(--white);font:700 18px/1 'Schibsted Grotesk',system-ui,sans-serif;margin-bottom:16px;}
-  .steps h3{font-size:20px;margin-bottom:8px;}
-  .steps p{color:var(--muted);font-size:17px;}
-  .note{margin-top:48px;padding:20px 24px;border-left:4px solid var(--green);background:var(--white);color:var(--text);max-width:46em;}
-
-  /* Over ons */
-  .about p{max-width:38em;margin-bottom:16px;}
-  .about p:last-child{margin-bottom:0;}
-
-  /* Contact */
-  .contact{background:var(--ink);color:var(--white);}
-  .contact h2{color:var(--white);}
-  .contact .intro{color:rgba(255,255,255,.78);}
-  .contact-grid{display:grid;grid-template-columns:0.8fr 1.2fr;gap:64px;align-items:start;}
-  .contact-direct{margin-top:28px;color:rgba(255,255,255,.78);}
-  .contact-direct a{color:var(--white);font-weight:600;}
-  .cf-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
-  .cf-grid label{display:flex;flex-direction:column;gap:6px;font-size:16px;font-weight:600;color:var(--white);}
-  .cf-grid .cf-full{grid-column:1 / -1;}
-  .cf-grid input,.cf-grid textarea{font:400 17px/1.4 'Source Sans 3',system-ui,sans-serif;padding:12px 14px;border-radius:6px;border:1px solid transparent;background:var(--white);color:var(--text);}
-  .cf-grid textarea{resize:vertical;}
-  .cf-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
-  .contact .btn-primary{background:var(--green);color:var(--ink);}
-  .contact .btn-primary:hover{background:#68C45E;}
-  .cf-status{min-height:26px;margin-top:14px;color:var(--white);}
-
-  footer{padding:32px 0;border-top:1px solid var(--line);font-size:16px;color:var(--muted);}
-  .foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;}
-  .foot .wordmark{font-size:19px;}
-
-  @media (max-width:900px){
-    section{padding:72px 0;}
-    .hero{padding:56px 0 72px;}
-    .hero-grid,.two-col,.contact-grid{grid-template-columns:1fr;gap:40px;}
-    .services{grid-template-columns:1fr;gap:32px;}
-    .steps{grid-template-columns:1fr 1fr;}
-    .nav-links a:not(.btn){display:none;}
-  }
-  @media (max-width:560px){
-    body{font-size:17px;}
-    .hero .lead{font-size:19px;}
-    .steps,.cf-grid{grid-template-columns:1fr;}
-    .wordmark{font-size:20px;}
-  }
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<header class="nav">
+<header class="nav" id="nav">
   <div class="wrap nav-inner">
     <a href="#top" class="brand" aria-label="ProcesVlot, naar boven">
       <svg viewBox="0 0 64 48" aria-hidden="true">
@@ -183,7 +27,7 @@
         <path d="M24.8 19.2A14 14 0 0 1 48.7 15" fill="none" stroke="#0F5FA8" stroke-width="4.5" stroke-linecap="round"/>
         <path d="M24.8 28.8A14 14 0 1 0 51.2 19.2" fill="none" stroke="#53B848" stroke-width="4.5" stroke-linecap="round"/>
         <path d="M47 19.5l7.5-2.5-1 8z" fill="#53B848"/>
-        <path d="M31 24l5.5 5L46 18" fill="none" stroke="#0A2E4D" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path class="check-mark" d="M31 24l5.5 5L46 18" fill="none" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
       <span class="wordmark">proces<span>vlot</span></span>
     </a>
@@ -191,51 +35,139 @@
       <a href="#wat-we-doen">Wat we doen</a>
       <a href="#werkwijze">Werkwijze</a>
       <a href="#over-ons">Over ons</a>
-      <a href="#contact" class="btn btn-primary">Kennismaken</a>
+      <a href="#contact" class="btn btn-green">Kennismaken</a>
     </nav>
   </div>
 </header>
 
 <main id="top">
 
-<section class="hero">
-  <div class="wrap hero-grid">
-    <div>
-      <h1>Minder administratie. Meer tijd voor je vak.</h1>
-      <p class="lead">Wij automatiseren het papierwerk van kleine bedrijven: klantaanvragen, bonnetjes en offertes. Jij werkt gewoon via je mail of WhatsApp, de rest loopt vanzelf.</p>
-      <div class="hero-actions">
-        <a href="#contact" class="btn btn-primary">Plan een gratis kennismaking</a>
-        <a href="#werkwijze" class="btn btn-link">Zo werken we</a>
-      </div>
-      <ul class="promises">
-        <li><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#3E9435" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Kennismaking is gratis</li>
-        <li><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#3E9435" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Vaste prijs vooraf</li>
-        <li><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#3E9435" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>In de programma's die je al hebt</li>
-      </ul>
-    </div>
+<!-- Filmische opening: 24 seconden, drie hoofdstukken -->
+<section class="stage" id="stage" aria-label="Zo werkt ProcesVlot">
+  <svg class="scene" id="scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <radialGradient id="bg" cx="0.66" cy="0.42" r="0.8">
+        <stop offset="0" stop-color="#0F3B61"/>
+        <stop offset="0.5" stop-color="#0A2E4D"/>
+        <stop offset="1" stop-color="#071F35"/>
+      </radialGradient>
+      <linearGradient id="gl1" gradientUnits="userSpaceOnUse" x1="470" y1="0" x2="720" y2="0"><stop offset="0" stop-color="#0F5FA8" stop-opacity="0"/><stop offset="1" stop-color="#0F5FA8"/></linearGradient>
+      <linearGradient id="gl2" gradientUnits="userSpaceOnUse" x1="440" y1="0" x2="690" y2="0"><stop offset="0" stop-color="#4A8FD0" stop-opacity="0"/><stop offset="1" stop-color="#4A8FD0"/></linearGradient>
+      <linearGradient id="gl3" gradientUnits="userSpaceOnUse" x1="470" y1="0" x2="720" y2="0"><stop offset="0" stop-color="#53B848" stop-opacity="0"/><stop offset="1" stop-color="#53B848"/></linearGradient>
+    </defs>
+    <rect width="1600" height="900" fill="url(#bg)"/>
+    <g id="cam">
+      <g fill="none" stroke="#FFFFFF" stroke-opacity="0.05" stroke-width="2">
+        <circle id="echo1" cx="1060" cy="360" r="270"/>
+        <circle id="echo2" cx="1060" cy="360" r="360"/>
+        <circle id="echo3" cx="1060" cy="360" r="460"/>
+      </g>
 
-    <div class="demo" aria-label="Voorbeeld: een bonnetje via WhatsApp komt vanzelf in het overzicht">
-      <div class="demo-chat">
-        <p class="demo-label">Jij, op de bouwplaats</p>
-        <div class="bubble">
-          <span class="file"><i></i>Bon Hornbach.jpg</span>
-          <small>14:32</small>
-        </div>
+      <g id="lineGroup" fill="none" stroke-linecap="round" stroke-width="14">
+        <path id="line1" d="M470 315H895" stroke="url(#gl1)"/>
+        <path id="line2" d="M440 360H865" stroke="url(#gl2)"/>
+        <path id="line3" d="M470 405H895" stroke="url(#gl3)"/>
+      </g>
+      <g fill="#FFFFFF">
+        <rect id="pulse1" x="0" y="309" width="70" height="12" rx="6" opacity="0"/>
+        <rect id="pulse2" x="0" y="354" width="70" height="12" rx="6" opacity="0"/>
+        <rect id="pulse3" x="0" y="399" width="70" height="12" rx="6" opacity="0"/>
+      </g>
+
+      <g fill="none" stroke-linecap="round" stroke-width="26">
+        <path id="arcBlue" d="M881.5 295A190 190 0 0 1 1205.5 237.9" stroke="#0F5FA8"/>
+        <path id="arcGreen" d="M881.5 425A190 190 0 1 0 1239.6 298.1" stroke="#53B848"/>
+      </g>
+      <path id="arrow" d="M1226.6 260.3L1264.2 289.6L1215 306.6Z" fill="#53B848" stroke="#53B848" stroke-width="6" stroke-linejoin="round" opacity="0"/>
+
+      <g id="doc" opacity="0">
+        <rect x="-85" y="-110" width="170" height="220" rx="10" fill="#F4F6F7"/>
+        <rect x="-85" y="-110" width="170" height="44" rx="10" fill="#FFFFFF"/>
+        <rect x="-85" y="-76" width="170" height="10" fill="#FFFFFF"/>
+        <text x="0" y="-81" text-anchor="middle" font-family="Schibsted Grotesk, sans-serif" font-weight="800" font-size="19" fill="#0A2E4D">HORNBACH</text>
+        <rect id="hl1" x="-72" y="-56" width="144" height="30" rx="5" fill="#53B848" opacity="0"/>
+        <rect id="hl2" x="-72" y="-16" width="144" height="30" rx="5" fill="#53B848" opacity="0"/>
+        <rect id="hl3" x="-72" y="58" width="144" height="34" rx="5" fill="#53B848" opacity="0"/>
+        <g font-family="Source Sans 3, sans-serif" font-size="16" fill="#24323D">
+          <text x="-62" y="-35">16-10-2026  14:28</text>
+          <text x="-62" y="5">Bouwmaterialen</text>
+          <rect x="-62" y="24" width="96" height="6" rx="3" fill="#C9D2D8"/>
+          <rect x="-62" y="38" width="120" height="6" rx="3" fill="#C9D2D8"/>
+          <text x="-62" y="81" font-weight="700" fill="#0A2E4D">Totaal</text>
+          <text x="62" y="81" text-anchor="end" font-weight="700" fill="#0A2E4D">€ 42,10</text>
+        </g>
+        <rect id="scan" x="-85" y="-110" width="170" height="4" fill="#53B848" opacity="0"/>
+      </g>
+
+      <g id="chips" font-family="Source Sans 3, sans-serif" font-size="20" font-weight="600" fill="#FFFFFF">
+        <g id="chip1" opacity="0"><rect x="-70" y="-20" width="140" height="40" rx="20" fill="rgba(255,255,255,0.08)" stroke="#53B848" stroke-width="2"/><text y="7" text-anchor="middle">16 okt</text></g>
+        <g id="chip2" opacity="0"><rect x="-70" y="-20" width="140" height="40" rx="20" fill="rgba(255,255,255,0.08)" stroke="#53B848" stroke-width="2"/><text y="7" text-anchor="middle">Hornbach</text></g>
+        <g id="chip3" opacity="0"><rect x="-70" y="-20" width="140" height="40" rx="20" fill="rgba(255,255,255,0.08)" stroke="#53B848" stroke-width="2"/><text y="7" text-anchor="middle">€ 42,10</text></g>
+      </g>
+
+      <g id="table" opacity="0" font-family="Source Sans 3, sans-serif" font-size="20" fill="#FFFFFF">
+        <text x="860" y="625" font-family="Schibsted Grotesk, sans-serif" font-weight="800" font-size="24">Bonnen oktober</text>
+        <path d="M860 645H1260" stroke="#FFFFFF" stroke-opacity="0.25" stroke-width="2"/>
+        <g opacity="0.75">
+          <text x="860" y="680">14 okt</text><text x="955" y="680">Shell</text><text x="1260" y="680" text-anchor="end">€ 62,40</text>
+          <path d="M860 696H1260" stroke="#FFFFFF" stroke-opacity="0.12" stroke-width="2"/>
+          <text x="860" y="730">15 okt</text><text x="955" y="730">Gamma</text><text x="1260" y="730" text-anchor="end">€ 18,95</text>
+          <path d="M860 746H1260" stroke="#FFFFFF" stroke-opacity="0.12" stroke-width="2"/>
+        </g>
+        <g id="newrow" opacity="0">
+          <rect x="848" y="754" width="424" height="44" rx="6" fill="#53B848" fill-opacity="0.22"/>
+          <rect x="848" y="754" width="5" height="44" fill="#53B848"/>
+          <text x="860" y="783" font-weight="600">16 okt</text><text x="955" y="783" font-weight="600">Hornbach</text><text x="1260" y="783" text-anchor="end" font-weight="600">€ 42,10</text>
+        </g>
+      </g>
+
+      <path id="check" d="M995 360L1040 405L1135 305" fill="none" stroke="#FFFFFF" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </svg>
+
+  <div class="panels" id="panels">
+    <div class="panel panel-1 is-active" data-chapter="0">
+      <div class="panel-content">
+        <h1>Minder <em>administratie</em>.<br>Meer tijd voor je vak.</h1>
+        <p>Een aanvraag of bonnetje komt binnen via je website, mail of WhatsApp. Ook als jij net op een klus staat.</p>
+        <a href="#contact" class="btn btn-green cta">Plan een gratis kennismaking</a>
       </div>
-      <div class="demo-table">
-        <h3>Bonnen oktober</h3>
-        <table>
-          <thead><tr><th>Datum</th><th>Leverancier</th><th class="num">Bedrag</th></tr></thead>
-          <tbody>
-            <tr><td>14 okt</td><td>Shell</td><td class="num">€ 62,40</td></tr>
-            <tr><td>15 okt</td><td>Gamma</td><td class="num">€ 18,95</td></tr>
-            <tr class="new"><td>16 okt</td><td>Hornbach <span class="tag-new">nieuw</span></td><td class="num">€ 42,10</td></tr>
-          </tbody>
-        </table>
+    </div>
+    <div class="panel panel-2" data-chapter="1" aria-hidden="true" inert>
+      <div class="panel-content">
+        <h2>Wij zetten het <em>vanzelf</em><br>op de juiste plek.</h2>
+        <p>De gegevens worden uitgelezen en netjes opgeslagen. Je klant krijgt een bevestiging, jij een melding.</p>
+        <a href="#werkwijze" class="btn btn-green cta">Zo werken we</a>
+      </div>
+    </div>
+    <div class="panel panel-3" data-chapter="2" aria-hidden="true" inert>
+      <div class="panel-content">
+        <h2>Jij houdt <em>tijd</em> over.<br>Voor je vak of je avond.</h2>
+        <p>Alles staat in één overzicht, klaar voor jou en je boekhouder. AI helpt mee, jij houdt de controle.</p>
+        <a href="#wat-we-doen" class="btn-text cta">Bekijk wat we automatiseren</a>
       </div>
     </div>
   </div>
+
+  <div class="story-controls" id="storyControls">
+    <div class="chapters">
+      <button class="chapter-btn" type="button" data-chapter="0" aria-label="Hoofdstuk 1: binnenkomen" aria-current="step"><span class="fill"></span></button>
+      <button class="chapter-btn" type="button" data-chapter="1" aria-label="Hoofdstuk 2: verwerken"><span class="fill"></span></button>
+      <button class="chapter-btn" type="button" data-chapter="2" aria-label="Hoofdstuk 3: klaar"><span class="fill"></span></button>
+    </div>
+    <button class="play-btn" id="playBtn" type="button" aria-label="Animatie pauzeren" title="Animatie pauzeren">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path id="playIcon" d="M8 5v14M16 5v14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+    </button>
+  </div>
 </section>
+
+<div class="promise-bar">
+  <ul class="wrap promises">
+    <li><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#3E9435" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Kennismaking is gratis</li>
+    <li><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#3E9435" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Vaste prijs vooraf</li>
+    <li><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#3E9435" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>In de programma's die je al hebt</li>
+  </ul>
+</div>
 
 <section class="soft">
   <div class="wrap two-col">
@@ -315,7 +247,7 @@
         <label class="cf-full">Waar kunnen we je mee helpen? *<textarea name="omschrijving" rows="4" required></textarea></label>
         <label class="cf-hp" aria-hidden="true">Website<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
       </div>
-      <button type="submit" class="btn btn-primary">Verstuur aanvraag</button>
+      <button type="submit" class="btn btn-green">Verstuur aanvraag</button>
       <p class="cf-status" id="contactStatus" role="status"></p>
     </form>
   </div>
@@ -330,35 +262,6 @@
   </div>
 </footer>
 
-<script>
-  (function () {
-    var form = document.getElementById('contactForm');
-    var status = document.getElementById('contactStatus');
-    var HOOK = 'https://hook.eu1.make.com/6jqmrpbboq8z195cjt7ht1bwnf5a3uf3';
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      if (!form.naam.value.trim() || !form.email.value.trim() || !form.omschrijving.value.trim()) {
-        status.textContent = 'Vul je naam, e-mailadres en je vraag in.';
-        return;
-      }
-      if (!form.email.checkValidity()) {
-        status.textContent = 'Controleer je e-mailadres.';
-        return;
-      }
-      var button = form.querySelector('button');
-      button.disabled = true;
-      status.textContent = 'Versturen...';
-      fetch(HOOK, { method: 'POST', mode: 'no-cors', body: new URLSearchParams(new FormData(form)) })
-        .then(function () {
-          form.reset();
-          status.textContent = 'Bedankt! We hebben je aanvraag ontvangen en nemen snel contact met je op.';
-        })
-        .catch(function () {
-          status.textContent = 'Versturen lukte niet. Mail ons gerust op info@procesvlot.nl.';
-        })
-        .then(function () { button.disabled = false; });
-    });
-  })();
-</script>
+<script src="main.js" defer></script>
 </body>
 </html>
