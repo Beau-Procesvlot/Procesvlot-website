@@ -19,7 +19,7 @@
 
 <header class="nav" id="nav">
   <div class="wrap nav-inner">
-    <a href="#top" class="brand" aria-label="ProcesVlot, naar boven">
+    <a href="./" class="brand" aria-label="ProcesVlot, naar de homepage">
       <svg viewBox="0 0 64 48" aria-hidden="true">
         <path d="M6 18h17" fill="none" stroke-width="4" stroke-linecap="round" stroke="#0F5FA8"/>
         <path d="M2 24h16" fill="none" stroke-width="4" stroke-linecap="round" stroke="#4A8FD0"/>
@@ -31,10 +31,10 @@
       </svg>
       <span class="wordmark">proces<span>vlot</span></span>
     </a>
-    <nav class="nav-links" aria-label="Hoofdmenu">
-      <a href="#wat-we-doen">Wat we doen</a>
-      <a href="#werkwijze">Werkwijze</a>
-      <a href="#over-ons">Over ons</a>
+    <button class="menu-toggle" id="menuToggle" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="Menu openen"><span></span><span></span></button>
+    <nav class="nav-links" id="navLinks" aria-label="Hoofdmenu">
+      <a href="werkwijze.html">Werkwijze</a>
+      <a href="over-ons.html">Over ons</a>
       <a href="#contact" class="btn btn-green">Kennismaken</a>
     </nav>
   </div>
@@ -137,14 +137,14 @@
       <div class="panel-content">
         <h2>Wij zetten het <em>vanzelf</em><br>op de juiste plek.</h2>
         <p>De gegevens worden uitgelezen en netjes opgeslagen. Je klant krijgt een bevestiging, jij een melding.</p>
-        <a href="#werkwijze" class="btn btn-green cta">Zo werken we</a>
+        <a href="werkwijze.html" class="btn btn-green cta">Zo werken we</a>
       </div>
     </div>
     <div class="panel panel-3" data-chapter="2" aria-hidden="true" inert>
       <div class="panel-content">
         <h2>Jij houdt <em>tijd</em> over.<br>Voor je vak of je avond.</h2>
         <p>Alles staat in één overzicht, klaar voor jou en je boekhouder. AI helpt mee, jij houdt de controle.</p>
-        <a href="#wat-we-doen" class="btn-text cta">Bekijk voorbeelden</a>
+        <a href="werkwijze.html#voorbeelden" class="btn-text cta">Bekijk voorbeelden</a>
       </div>
     </div>
   </div>
@@ -161,81 +161,16 @@
   </div>
 </section>
 
-<div class="promise-bar">
-  <ul class="wrap promises">
-    <li><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#3E9435" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Kennismaking is gratis</li>
-    <li><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#3E9435" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Vaste prijs vooraf</li>
-    <li><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#3E9435" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>In de programma's die je al hebt</li>
-  </ul>
-</div>
-
-<section class="soft">
-  <div class="wrap two-col">
-    <div>
-      <h2>Herken je dit?</h2>
-      <p class="intro">De meeste vakmensen die we spreken doen hun administratie erbij. Tussen de klussen door, of 's avonds aan de keukentafel.</p>
-    </div>
-    <div>
-      <ul class="quotes">
-        <li>"Ik doe de administratie 's avonds, als het werk klaar is."</li>
-        <li>"Een aanvraag via de mail raakt weleens ondergesneeuwd."</li>
-        <li>"Mijn bonnetjes zitten in de auto, in mijn jas en in mijn mail."</li>
-        <li>"Offertes nabellen schiet er vaak bij in."</li>
-      </ul>
-      <p class="quotes-end">Dat kost je avonden, en soms ook een klant.</p>
-    </div>
-  </div>
-</section>
-
-<section id="wat-we-doen">
-  <div class="wrap">
-    <h2>Op maat gemaakt voor jouw bedrijf</h2>
-    <p class="intro">We werken niet met standaardpakketten. We kijken wat jou de meeste tijd kost en bouwen daar een oplossing voor. Dit zijn een paar voorbeelden van wat we op maat kunnen maken.</p>
-    <div class="services">
-      <article class="service">
-        <h3>Klantaanvragen</h3>
-        <p>Elke aanvraag van je website of mail komt in één overzicht. De klant krijgt direct een bevestiging en jij een melding. Er raakt niets meer kwijt.</p>
-      </article>
-      <article class="service">
-        <h3>Bonnetjes en facturen</h3>
-        <p>Maak een foto en stuur hem door. Hij wordt uitgelezen en op de juiste plek bewaard, klaar voor je boekhouder.</p>
-      </article>
-      <article class="service">
-        <h3>Offertes</h3>
-        <p>Een aanvraag wordt een conceptofferte met jouw producten en prijzen. Jij kijkt hem na en verstuurt hem.</p>
-      </article>
-    </div>
-  </div>
-</section>
-
-<section id="werkwijze" class="soft">
-  <div class="wrap">
-    <h2>Zo werken we</h2>
-    <p class="intro">Geen lang traject en geen nieuwe software om te leren. We bouwen het in de programma's die je al gebruikt.</p>
-    <ol class="steps">
-      <li><h3>Kennismaking</h3><p>We bellen of komen langs en kijken waar je tijd in gaat zitten. Gratis en vrijblijvend.</p></li>
-      <li><h3>Voorstel</h3><p>Je krijgt een voorstel met een vaste prijs. Je weet vooraf waar je aan toe bent.</p></li>
-      <li><h3>Bouwen en testen</h3><p>We zetten het op in jouw eigen accounts en testen het samen met jou.</p></li>
-      <li><h3>Uitleg en nazorg</h3><p>Je krijgt uitleg en we blijven bereikbaar als er iets is.</p></li>
-    </ol>
-    <p class="note"><strong>Jij houdt de controle.</strong> We gebruiken AI om bonnetjes en aanvragen uit te lezen en te ordenen. Het neemt geen beslissingen voor je: offertes en mails naar klanten kijk je altijd eerst zelf na.</p>
-  </div>
-</section>
-
-<section id="over-ons" class="about">
-  <div class="wrap">
-    <h2>Over ons</h2>
-    <p>ProcesVlot is opgericht door Beau en Sander. We zagen bij ondernemers om ons heen hoeveel tijd er naar papierwerk gaat, terwijl ze liever met hun vak bezig zijn.</p>
-    <p>We houden het praktisch. Geen ingewikkelde systemen, maar automatiseringen in je mail, Excel en WhatsApp, die je na een korte uitleg zelf snapt.</p>
-    <p>We zijn net gestart en werken nu met een paar bedrijven uit ons eigen netwerk. Wil je een van de eersten zijn? We horen graag van je.</p>
-  </div>
-</section>
-
 <section id="contact" class="contact">
   <div class="wrap contact-grid">
     <div>
       <h2>Benieuwd wat je kunt besparen?</h2>
       <p class="intro">Vertel kort waar je tegenaan loopt. We nemen zo snel mogelijk contact met je op voor een gratis kennismaking.</p>
+      <ul class="promises">
+        <li><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#3E9435" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Kennismaking is gratis</li>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#3E9435" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Vaste prijs vooraf</li>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#3E9435" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>In de programma's die je al hebt</li>
+      </ul>
       <p class="contact-direct">Liever direct mailen?<br><a href="mailto:info@procesvlot.nl">info@procesvlot.nl</a></p>
     </div>
     <form class="contact-form" id="contactForm" novalidate>
@@ -255,11 +190,37 @@
 
 </main>
 
-<footer>
-  <div class="wrap foot">
-    <span class="wordmark">proces<span>vlot</span></span>
-    <span>Minder administratie, meer tijd voor ondernemen. <a href="mailto:info@procesvlot.nl">info@procesvlot.nl</a></span>
+<footer class="site-foot">
+  <div class="wrap foot-grid">
+    <div class="foot-brand">
+      <span class="wordmark">proces<span>vlot</span></span>
+      <p>Minder administratie, meer tijd voor je vak. Automatiseringen op maat voor kleine bedrijven.</p>
+    </div>
+    <div>
+      <h3>Contact</h3>
+      <ul>
+        <li><a href="mailto:info@procesvlot.nl">info@procesvlot.nl</a></li>
+        <li>Beau: <a href="mailto:beau@procesvlot.nl">beau@procesvlot.nl</a></li>
+        <li>Sander: <a href="mailto:sander@procesvlot.nl">sander@procesvlot.nl</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3>Locatie</h3>
+      <ul>
+        <li>Noord-Brabant</li>
+        <li>Nederland</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Pagina's</h3>
+      <ul>
+        <li><a href="./">Home</a></li>
+        <li><a href="werkwijze.html">Werkwijze</a></li>
+        <li><a href="over-ons.html">Over ons</a></li>
+      </ul>
+    </div>
   </div>
+  <div class="wrap foot-bottom">© 2026 ProcesVlot</div>
 </footer>
 
 <script src="main.js" defer></script>
