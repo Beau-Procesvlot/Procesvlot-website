@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; media-src 'self'; connect-src https://hook.eu1.make.com; form-action 'none'; base-uri 'self'; object-src 'none'; frame-src 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="theme-color" content="#0A2E4D">
 <title>ProcesVlot | Minder administratie, meer tijd voor je vak</title>
 <meta name="description" content="ProcesVlot automatiseert het papierwerk van kleine bedrijven, op maat van wat jij nodig hebt. Gratis kennismaking, vaste prijs vooraf.">
@@ -173,17 +175,18 @@
       </ul>
       <p class="contact-direct">Liever direct mailen?<br><a href="mailto:info@procesvlot.nl">info@procesvlot.nl</a></p>
     </div>
-    <form class="contact-form" id="contactForm" novalidate>
+    <form class="contact-form" id="contactForm" method="post" novalidate>
       <div class="cf-grid">
-        <label>Naam *<input type="text" name="naam" required autocomplete="name"></label>
-        <label>E-mail *<input type="email" name="email" required autocomplete="email"></label>
-        <label>Telefoon<input type="tel" name="telefoon" autocomplete="tel"></label>
-        <label>Plaats<input type="text" name="plaats" autocomplete="address-level2"></label>
-        <label class="cf-full">Waar kunnen we je mee helpen? *<textarea name="omschrijving" rows="4" required></textarea></label>
+        <label>Naam *<input type="text" name="naam" maxlength="100" required autocomplete="name"></label>
+        <label>E-mail *<input type="email" name="email" maxlength="254" required autocomplete="email"></label>
+        <label>Telefoon<input type="tel" name="telefoon" maxlength="30" autocomplete="tel"></label>
+        <label>Plaats<input type="text" name="plaats" maxlength="80" autocomplete="address-level2"></label>
+        <label class="cf-full">Waar kunnen we je mee helpen? *<textarea name="omschrijving" rows="4" maxlength="3000" required></textarea></label>
         <label class="cf-hp" aria-hidden="true">Website<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
       </div>
       <button type="submit" class="btn btn-green">Verstuur aanvraag</button>
       <p class="cf-status" id="contactStatus" role="status"></p>
+      <p class="cf-privacy">We gebruiken je gegevens alleen om contact met je op te nemen over je aanvraag. We delen ze niet met anderen en verwijderen ze als je daarom vraagt.</p>
     </form>
   </div>
 </section>

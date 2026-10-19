@@ -236,6 +236,7 @@ h2{font-size:clamp(30px,3.6vw,42px);font-weight:800;margin-bottom:18px;}
 .cf-grid textarea{resize:vertical;}
 .cf-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
 .cf-status{min-height:26px;margin-top:14px;color:var(--ink);}
+.cf-privacy{margin-top:6px;font-size:14px;color:var(--muted);line-height:1.5;}
 
 /* ---------- Subpagina's ---------- */
 .subpage{padding-top:76px;}
