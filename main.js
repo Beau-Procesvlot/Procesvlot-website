@@ -304,7 +304,7 @@
           status.textContent = 'Bedankt! We hebben je aanvraag ontvangen en nemen snel contact met je op.';
         })
         .catch(function () {
-          status.textContent = 'Versturen lukte niet. Mail ons gerust op info@procesvlot.nl.';
+          status.textContent = 'Versturen lukte niet. Mail ons gerust op info@vaktijd.nl.';
         })
         .then(function () { button.disabled = false; });
     });
