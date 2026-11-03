@@ -223,6 +223,9 @@ h2{font-size:clamp(30px,3.6vw,42px);font-weight:800;margin-bottom:18px;}
 
 /* ---------- Contact (homepage, direct onder de opening) ---------- */
 .contact{background:var(--soft);}
+.local h2{font-size:clamp(24px,2.6vw,32px);}
+.local p{color:var(--muted);max-width:38em;}
+.local p + p{margin-top:14px;}
 .contact-grid{display:grid;grid-template-columns:0.85fr 1.15fr;gap:64px;align-items:start;}
 .contact .promises{flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:10px;margin-top:28px;}
 .contact-direct{margin-top:28px;color:var(--muted);}
