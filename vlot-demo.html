@@ -1,0 +1,726 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; media-src 'self'; connect-src 'self' https://cloudflareinsights.com; base-uri 'self'; object-src 'none'; form-action 'none'">
+<meta name="robots" content="noindex">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VLOT demo | Vaktijd</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&family=Rajdhani:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#020b1a;--c:#3fd0ff;--c2:#1a8cff;--dim:#0e3a5c;--txt:#cfefff;--warn:#ffb347;--bad:#ff5a5a}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font-family:Rajdhani,sans-serif}
+#bg{position:fixed;inset:0}
+#stage{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform-origin:center}
+#world{position:absolute;inset:0;z-index:2;transition:transform 1.1s cubic-bezier(.7,0,.2,1);transform-origin:0 0}
+.abs{position:absolute}
+.fade{transition:opacity .6s}
+.hidden{opacity:0!important;pointer-events:none!important}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes spinr{to{transform:rotate(-360deg)}}
+@keyframes flow{to{stroke-dashoffset:-56}}
+@keyframes blink{50%{opacity:.25}}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}}
+svg.wires{position:absolute;inset:0;width:1600px;height:900px;pointer-events:none;overflow:visible}
+.wire{stroke:var(--c);stroke-width:1.2;fill:none;opacity:.55;stroke-dasharray:5 7;animation:flow 2.5s linear infinite}
+
+/* ronde kanaalbubbels */
+.node{position:absolute;transform:translate(-50%,-50%);cursor:pointer;text-align:center;z-index:3}
+.node .ring{width:112px;height:112px;border-radius:50%;border:1.5px solid var(--c);display:flex;align-items:center;justify-content:center;flex-direction:column;box-shadow:0 0 18px #3fd0ff55,inset 0 0 18px #3fd0ff33;background:#03203aee;position:relative;transition:transform .3s,box-shadow .3s}
+.node .ring::before{content:"";position:absolute;inset:-9px;border-radius:50%;border:1px dashed #3fd0ff88;animation:spin 14s linear infinite}
+.node .ring::after{content:"";position:absolute;inset:-16px;border-radius:50%;border:2px solid transparent;border-top-color:#3fd0ff99;animation:spinr 6s linear infinite}
+.node:hover .ring{transform:scale(1.08);box-shadow:0 0 34px #3fd0ffaa,inset 0 0 22px #3fd0ff55}
+.node .ico{font-size:26px;color:var(--c)}
+.node .lbl{font-family:Orbitron;font-size:11px;letter-spacing:2px;margin-top:5px}
+.node .sub{font-size:13px;opacity:.7}
+.node.small .ring{width:100px;height:100px}
+.node.small .lbl{font-size:10px}
+.badge{position:absolute;top:2px;right:2px;background:var(--warn);color:#201000;border-radius:10px;font-size:12px;padding:0 6px;font-weight:600}
+
+/* rechthoekige HUD-vakken */
+.box{position:absolute;border:1px solid #3fd0ff66;background:#021a2ecc;padding:26px 12px 10px;clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);z-index:2}
+.box::before{content:attr(data-t);position:absolute;left:0;top:0;right:0;height:18px;background:#3fd0ff22;border-bottom:1px solid #3fd0ff55;font-family:Orbitron;font-size:10px;letter-spacing:2px;color:var(--c);padding:3px 0 0 18px}
+.box::after{content:attr(data-id);position:absolute;right:10px;top:3px;font-family:'Share Tech Mono';font-size:10px;opacity:.55}
+.box .k{font-family:Orbitron;font-size:22px;color:#e6fbff;text-shadow:0 0 10px var(--c)}
+.mono{font-family:'Share Tech Mono';font-size:12px}
+.up{color:var(--c)}.down{color:var(--warn)}
+.row{display:flex;justify-content:space-between;align-items:center;font-size:14px;padding:2px 0}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;background:var(--c);box-shadow:0 0 6px var(--c)}
+.dot.w{background:var(--warn);box-shadow:0 0 6px var(--warn)}.dot.b{background:var(--bad);box-shadow:0 0 6px var(--bad);animation:blink 1s infinite}
+.minibar{height:4px;background:var(--dim);position:relative;margin:3px 0 6px}
+.minibar i{position:absolute;left:0;top:0;bottom:0;background:var(--c);box-shadow:0 0 6px var(--c);transition:width 1.2s}
+
+/* kern */
+#core{position:absolute;left:630px;top:210px;width:340px;height:340px;cursor:pointer;z-index:5}
+#core svg{width:100%;height:100%;overflow:visible}
+.r1{animation:spin 20s linear infinite;transform-origin:150px 150px}
+.r2{animation:spinr 12s linear infinite;transform-origin:150px 150px}
+.r3{animation:spin 6s linear infinite;transform-origin:150px 150px}
+#core.listening .r3{animation-duration:1.2s}
+#core.thinking .r1{animation-duration:3s}
+#coreLabel{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;font-family:Orbitron;letter-spacing:6px;font-size:30px;color:#e6fbff;text-shadow:0 0 14px var(--c);pointer-events:none}
+#coreState{position:absolute;left:0;right:0;top:calc(50% + 28px);text-align:center;font-size:13px;letter-spacing:3px;opacity:.75;pointer-events:none}
+#transcript{position:absolute;left:50%;transform:translateX(-50%);width:max-content;max-width:640px;top:552px;text-align:center;font-size:15px;line-height:1.45;z-index:6;pointer-events:none;padding:4px 10px;text-shadow:0 0 6px #020b1a,0 0 12px #020b1a,0 0 18px #020b1a,0 0 10px #3fd0ff55;transition:opacity .5s}
+#transcript:empty{display:none}
+#transcript.weg,body.ingezoomd #transcript,body.paneel #transcript{opacity:0}
+#transcript .you{opacity:.6;font-size:14px}
+
+/* dagupdate-platform */
+#platform{position:absolute;left:600px;top:560px;width:400px;height:200px;perspective:700px;cursor:pointer;z-index:4}
+#beam{position:absolute;left:150px;top:-40px;width:100px;height:130px;background:linear-gradient(to top,#3fd0ff55,transparent);clip-path:polygon(0 100%,100% 100%,62% 0,38% 0);pointer-events:none;animation:blink 3s infinite}
+.disc{position:absolute;left:50px;top:-50px;width:300px;height:300px;transform:rotateX(74deg);transform-style:preserve-3d}
+.disc div{position:absolute;border-radius:50%;inset:0}
+.d1{border:2px solid #3fd0ffaa;box-shadow:0 0 30px #3fd0ff88,inset 0 0 60px #3fd0ff44;background:radial-gradient(circle,#3fd0ff33,#03203a00 70%)}
+.d2{inset:30px!important;border:6px dashed #3fd0ff77;animation:spin 10s linear infinite}
+.d3{inset:65px!important;border:2px solid #3fd0ffcc;border-left-color:transparent;border-right-color:transparent;animation:spinr 4s linear infinite}
+.d4{inset:105px!important;background:#3fd0ff44;box-shadow:0 0 40px #3fd0ff}
+#platform:hover .d1{box-shadow:0 0 60px #3fd0ffdd,inset 0 0 80px #3fd0ff77}
+#platLabel{position:absolute;left:0;right:0;top:104px;text-align:center;font-family:Orbitron;font-size:13px;letter-spacing:5px;color:#e6fbff;text-shadow:0 0 10px var(--c)}
+#platLabel small{display:block;font-family:Rajdhani;letter-spacing:2px;font-size:12px;opacity:.7}
+
+#briefPanel{left:470px;top:120px;width:660px;max-height:560px;overflow:auto;z-index:20;transition:opacity .4s,transform .4s;padding:34px 26px 20px}
+#briefPanel.off{opacity:0;pointer-events:none;transform:translateY(30px)}
+#briefPanel h3{font-family:Orbitron;font-size:11px;letter-spacing:2px;margin:12px 0 6px;opacity:.8}
+#briefPanel li{list-style:none;padding:3px 0 3px 16px;position:relative;font-size:17px}
+#briefPanel li::before{content:"";position:absolute;left:0;top:11px;width:7px;height:7px;background:var(--c);transform:rotate(45deg)}
+#briefPanel li.w::before{background:var(--warn)}
+#chPanel{left:1090px;top:100px;width:490px;height:680px;overflow:auto;z-index:20;transition:opacity .4s,transform .4s;padding:34px 22px 18px}
+#chPanel.off{opacity:0;pointer-events:none;transform:translateX(30px)}
+#chPanel h3{font-family:Orbitron;font-size:11px;letter-spacing:2px;margin:14px 0 6px;opacity:.8}
+#chPanel .tabs{display:flex;gap:6px;flex-wrap:wrap}
+#chPanel .tab,#chPanel .btn{font-family:Orbitron;font-size:10px;letter-spacing:1.5px;padding:5px 9px;border:1px solid #3fd0ff44;cursor:pointer;color:var(--txt);text-decoration:none;display:inline-block}
+#chPanel .tab.on,#chPanel .tab:hover,#chPanel .btn:hover{background:#3fd0ff22;border-color:var(--c);color:#e6fbff}
+#chPanel .btns{display:flex;gap:8px;margin-top:14px}
+#cpIn{width:100%;margin-top:6px;background:#03203a;border:1px solid #3fd0ff55;color:var(--txt);font:12px 'Share Tech Mono';padding:4px 6px;box-sizing:border-box}
+#chPanel .sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px}
+#chPanel .stile{border:1px solid #3fd0ff33;background:#3fd0ff0a;padding:5px 8px}
+#chPanel .sl{font-size:9px;opacity:.6;letter-spacing:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#chPanel .sv{font-family:Orbitron;font-size:19px;color:#e6fbff;line-height:1.3}
+#chPanel .sh{font-family:Orbitron;font-size:10px;letter-spacing:1.5px;margin:10px 0 6px;opacity:.9}
+#chPanel .prow{display:flex;gap:9px;align-items:center;padding:5px 0;border-bottom:1px solid #3fd0ff1a;color:inherit;text-decoration:none}
+#chPanel .prow:hover{background:#3fd0ff0f}
+#chPanel .prow img,#chPanel .noimg{width:46px;height:46px;object-fit:cover;border:1px solid #3fd0ff44;flex:none}
+#chPanel .pmid{flex:1;min-width:0}#chPanel .ptx{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#chPanel .pbar{height:3px;background:var(--dim);margin-top:4px}#chPanel .pbar i{display:block;height:100%;background:var(--c);box-shadow:0 0 6px var(--c)}
+#chPanel .pnum{font-size:10px;text-align:right;line-height:1.35;flex:none;width:86px}#chPanel .pnum b{color:#e6fbff;font-size:12px}
+.qbtn{position:absolute;transform:translate(-50%,0);font-family:Orbitron;font-size:9px;letter-spacing:1.5px;padding:5px 10px;border:1px solid #3fd0ff55;background:#03203acc;color:var(--txt);cursor:pointer;white-space:nowrap;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);z-index:3}
+.qbtn:hover{background:#3fd0ff33;color:#e6fbff;border-color:var(--c)}
+.close{position:absolute;right:12px;top:22px;cursor:pointer;opacity:.7;font-size:22px}
+
+#back{position:absolute;left:24px;top:110px;font-family:Orbitron;font-size:12px;letter-spacing:2px;border:1px solid var(--c);padding:8px 14px;cursor:pointer;z-index:9;background:#03203acc;transition:opacity .4s}
+#back.off{opacity:0;pointer-events:none}
+#crumb{position:absolute;left:24px;top:150px;font-family:Orbitron;font-size:11px;letter-spacing:3px;color:var(--c);transition:opacity .4s}
+
+#eq{position:absolute;left:0;top:700px;width:1600px;height:200px;z-index:1;cursor:pointer}
+#np{position:absolute;left:450px;width:700px;top:832px;z-index:5;text-align:center;cursor:pointer}
+#np .npr{display:flex;align-items:center;justify-content:center;gap:12px;height:28px}
+#spCover{width:26px;height:26px;border:1px solid #3fd0ff66;object-fit:cover;display:none}
+#spTitel{font-family:Orbitron;font-size:14px;letter-spacing:2px;color:#e6fbff;max-width:340px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:text-shadow .1s}
+#spArt{opacity:.7;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#spCtl{display:none;letter-spacing:6px;font-size:12px;opacity:.85}#spCtl span:hover{color:#e6fbff}
+#np .prog{width:420px;height:2px;margin:6px auto 4px;background:var(--dim);position:relative}
+#spBar{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--c);box-shadow:0 0 6px var(--c);transition:width 1s linear}
+#eqLabel{font-family:Orbitron;font-size:9px;letter-spacing:2px;opacity:.5}
+.deco{pointer-events:none}
+#np{display:none}#demoTag{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);z-index:50;font:12px 'Share Tech Mono',monospace;letter-spacing:2px;color:#e6fbff;background:#03203acc;border:1px solid #3fd0ff66;padding:6px 14px;white-space:nowrap;pointer-events:none}
+@media (max-width:700px){#demoTag{font-size:9px;letter-spacing:1px}}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div id="demoTag">DEMO · FICTIEVE GEGEVENS · KLIK OP EEN KANAAL OF OP DE KERN</div>
+
+<div id="stage">
+  <canvas id="eq" width="1600" height="200" ></canvas>
+  <div id="np"><div id="sp">
+    <div class="npr"><img id="spCover" alt=""><span id="spTitel">SPOTIFY</span><span id="spArt" class="mono">niet gekoppeld</span>
+      <span class="mono" id="spCtl"><span data-a="previous">&#9664;&#9664;</span> <span data-a="toggle" id="spPP">&#10074;&#10074;</span> <span data-a="next">&#9654;&#9654;</span></span></div>
+    <div class="prog"><i id="spBar"></i></div>
+    <div id="eqLabel">KLIK HIER VOOR LIVE BEAT (SYSTEEMAUDIO DELEN)</div></div></div>
+
+  <div id="world">
+    <svg class="wires" id="wires"></svg>
+
+    <!-- oog-ellips rond de kern -->
+    <svg class="wires deco" style="z-index:1">
+      <ellipse cx="800" cy="380" rx="320" ry="140" fill="none" stroke="#3fd0ff" stroke-width="3" stroke-dasharray="1 11" stroke-linecap="round" opacity=".8"><animate attributeName="stroke-dashoffset" from="0" to="-120" dur="12s" repeatCount="indefinite"/></ellipse>
+      <ellipse cx="800" cy="380" rx="345" ry="158" fill="none" stroke="#3fd0ff" stroke-width="1" stroke-dasharray="40 14 4 14" opacity=".35"><animate attributeName="stroke-dashoffset" from="0" to="144" dur="9s" repeatCount="indefinite"/></ellipse>
+      <path d="M455 380 H520 M1080 380 H1145" stroke="#3fd0ff" stroke-width="2" opacity=".7"/>
+      <circle cx="455" cy="380" r="3" fill="#3fd0ff"/><circle cx="1145" cy="380" r="3" fill="#3fd0ff"/>
+    </svg>
+
+    <div id="core" title="Klik om te praten">
+      <svg viewBox="0 0 300 300">
+        <defs><filter id="gl"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <radialGradient id="cg"><stop offset="0" stop-color="#e6fbff" stop-opacity=".9"/><stop offset=".35" stop-color="#3fd0ff" stop-opacity=".35"/><stop offset="1" stop-color="#3fd0ff" stop-opacity="0"/></radialGradient></defs>
+        <circle cx="150" cy="150" r="80" fill="url(#cg)"/>
+        <g filter="url(#gl)" fill="none" stroke="#3fd0ff">
+          <circle cx="150" cy="150" r="146" stroke-opacity=".25"/>
+          <g class="r1"><circle cx="150" cy="150" r="136" stroke-width="3" stroke-dasharray="60 25 10 25"/></g>
+          <g class="r2"><circle cx="150" cy="150" r="118" stroke-width="1.5" stroke-dasharray="2 6" stroke-opacity=".8"/>
+            <circle cx="150" cy="150" r="108" stroke-width="7" stroke-dasharray="40 160" stroke-opacity=".7"/></g>
+          <g class="r3"><circle cx="150" cy="150" r="92" stroke-width="2" stroke-dasharray="120 30 20 30"/></g>
+          <circle id="pulse" cx="150" cy="150" r="70" stroke-width="2" fill="#3fd0ff" fill-opacity=".06"/>
+        </g>
+      </svg>
+      <div id="coreLabel">VAKTIJD</div>
+      <div id="coreState">KLIK OM TE PRATEN</div>
+    </div>
+
+    <div id="platform" title="Dagupdate">
+      <div id="beam"></div>
+      <div class="disc"><div class="d1"></div><div class="d2"></div><div class="d3"></div><div class="d4"></div></div>
+      <div id="platLabel">DAGUPDATE<small id="platSub">3 taken · 4 wijzigingen</small></div>
+    </div>
+  </div>
+
+  <div id="transcript"></div>
+  <div id="back" class="off">&larr; TERUG</div>
+  <div id="crumb"></div>
+  <div id="chPanel" class="box off" data-t="KANAAL" data-id="TAB-01"><span class="close">&times;</span><div id="cpBody"></div></div>
+  <div id="briefPanel" class="box off" data-t="DAGUPDATE" data-id="BRF-01"><span class="close">&times;</span><div id="briefBody"></div></div>
+</div>
+
+<script>
+window.__DEMO={"bijgewerkt":"2026-11-10T07:30:00+01:00","brief":{"vandaag":["08:00 Lekkende kraan, Fam. Jansen (Someren)","11:30 Dakkapel opmeten (Asten)","15:00 Badkamer bespreken (Lierop)","Offerte De Vries afmaken"],"veranderd":["3 nieuwe aanvragen binnen","2 offertes geaccepteerd","Factuur Bakker betaald","Instagram-bereik +18% deze week"],"let":["1 aanvraag wacht al 2 dagen op antwoord"]},"waarschuwingen":[],"agenda":[{"dag":"2026-11-09","start":"08:00","eind":"10:00","titel":"Lekkende kraan · Fam. Jansen"},{"dag":"2026-11-09","start":"11:30","eind":"12:30","titel":"Dakkapel opmeten · Asten"},{"dag":"2026-11-09","start":"15:00","eind":"16:00","titel":"Badkamer bespreken · Lierop"}],"mail":{"ongelezen":3,"recent":[{"onderwerp":"Offerteaanvraag dakkapel","van":"P. de Vries"},{"onderwerp":"Websiteformulier: badkamer","van":"M. Bakker"},{"onderwerp":"WhatsApp: lekkende kraan","van":"Fam. Jansen"},{"onderwerp":"Facebook: prijs schuurtje?","van":"Sanne K."}],"update":{"samenvatting":"3 nieuwe aanvragen, waarvan 1 voor een offerte.","binnen":[]},"zonderAntwoord":[]},"make":{"actief":4,"scenarios":[{"id":1,"naam":"Klantaanvragen","status":"ok","label":"12× DEZE WEEK","runsWeek":12,"runsMaand":41,"laatsteRun":"2026-11-10T07:12:00Z","fouten7d":0},{"id":2,"naam":"Afspraakherinnering","status":"ok","label":"9× DEZE WEEK","runsWeek":9,"runsMaand":33,"laatsteRun":"2026-11-09T17:00:00Z","fouten7d":0},{"id":3,"naam":"Offerte klaarzetten","status":"ok","label":"5× DEZE WEEK","runsWeek":5,"runsMaand":17,"laatsteRun":"2026-11-09T15:20:00Z","fouten7d":0},{"id":4,"naam":"Bonnetjes","status":"ok","label":"7× DEZE WEEK","runsWeek":7,"runsMaand":26,"laatsteRun":"2026-11-09T19:40:00Z","fouten7d":0}],"fouten":[]},"socials":{"bijgewerkt":"2026-11-10T07:30:00+01:00","fb":{"naam":"Installatiebedrijf (demo)","volgers":286,"week":{"weergaven":1840,"bereik":1210,"bezoeken":64,"interacties":92,"videoweergaven":730},"vorige":{"weergaven":1520,"bereik":990,"bezoeken":51,"interacties":70,"videoweergaven":610},"reeks":{"weergaven":[{"dag":"2026-10-14","v":240},{"dag":"2026-10-15","v":296},{"dag":"2026-10-16","v":328},{"dag":"2026-10-17","v":323},{"dag":"2026-10-18","v":286},{"dag":"2026-10-19","v":236},{"dag":"2026-10-20","v":199},{"dag":"2026-10-21","v":195},{"dag":"2026-10-22","v":228},{"dag":"2026-10-23","v":285},{"dag":"2026-10-24","v":341},{"dag":"2026-10-25","v":372},{"dag":"2026-10-26","v":366},{"dag":"2026-10-27","v":328},{"dag":"2026-10-28","v":278},{"dag":"2026-10-29","v":242},{"dag":"2026-10-30","v":238},{"dag":"2026-10-31","v":272},{"dag":"2026-11-01","v":329},{"dag":"2026-11-02","v":385},{"dag":"2026-11-03","v":415},{"dag":"2026-11-04","v":408},{"dag":"2026-11-05","v":370},{"dag":"2026-11-06","v":320},{"dag":"2026-11-07","v":284},{"dag":"2026-11-08","v":282},{"dag":"2026-11-09","v":316},{"dag":"2026-11-10","v":374}],"bereik":[{"dag":"2026-10-14","v":160},{"dag":"2026-10-15","v":195},{"dag":"2026-10-16","v":216},{"dag":"2026-10-17","v":213},{"dag":"2026-10-18","v":190},{"dag":"2026-10-19","v":158},{"dag":"2026-10-20","v":136},{"dag":"2026-10-21","v":133},{"dag":"2026-10-22","v":154},{"dag":"2026-10-23","v":190},{"dag":"2026-10-24","v":225},{"dag":"2026-10-25","v":245},{"dag":"2026-10-26","v":241},{"dag":"2026-10-27","v":218},{"dag":"2026-10-28","v":186},{"dag":"2026-10-29","v":164},{"dag":"2026-10-30","v":162},{"dag":"2026-10-31","v":183},{"dag":"2026-11-01","v":219},{"dag":"2026-11-02","v":254},{"dag":"2026-11-03","v":274},{"dag":"2026-11-04","v":269},{"dag":"2026-11-05","v":246},{"dag":"2026-11-06","v":214},{"dag":"2026-11-07","v":192},{"dag":"2026-11-08","v":191},{"dag":"2026-11-09","v":213},{"dag":"2026-11-10","v":249}],"bezoeken":[{"dag":"2026-10-14","v":9},{"dag":"2026-10-15","v":12},{"dag":"2026-10-16","v":13},{"dag":"2026-10-17","v":13},{"dag":"2026-10-18","v":11},{"dag":"2026-10-19","v":8},{"dag":"2026-10-20","v":7},{"dag":"2026-10-21","v":6},{"dag":"2026-10-22","v":8},{"dag":"2026-10-23","v":11},{"dag":"2026-10-24","v":13},{"dag":"2026-10-25","v":15},{"dag":"2026-10-26","v":15},{"dag":"2026-10-27","v":13},{"dag":"2026-10-28","v":10},{"dag":"2026-10-29","v":8},{"dag":"2026-10-30","v":8},{"dag":"2026-10-31","v":10},{"dag":"2026-11-01","v":12},{"dag":"2026-11-02","v":15},{"dag":"2026-11-03","v":17},{"dag":"2026-11-04","v":16},{"dag":"2026-11-05","v":14},{"dag":"2026-11-06","v":12},{"dag":"2026-11-07","v":10},{"dag":"2026-11-08","v":10},{"dag":"2026-11-09","v":11},{"dag":"2026-11-10","v":14}],"interacties":[{"dag":"2026-10-14","v":12},{"dag":"2026-10-15","v":15},{"dag":"2026-10-16","v":17},{"dag":"2026-10-17","v":17},{"dag":"2026-10-18","v":15},{"dag":"2026-10-19","v":11},{"dag":"2026-10-20","v":9},{"dag":"2026-10-21","v":9},{"dag":"2026-10-22","v":11},{"dag":"2026-10-23","v":14},{"dag":"2026-10-24","v":18},{"dag":"2026-10-25","v":20},{"dag":"2026-10-26","v":19},{"dag":"2026-10-27","v":17},{"dag":"2026-10-28","v":14},{"dag":"2026-10-29","v":11},{"dag":"2026-10-30","v":11},{"dag":"2026-10-31","v":13},{"dag":"2026-11-01","v":16},{"dag":"2026-11-02","v":20},{"dag":"2026-11-03","v":22},{"dag":"2026-11-04","v":21},{"dag":"2026-11-05","v":19},{"dag":"2026-11-06","v":16},{"dag":"2026-11-07","v":13},{"dag":"2026-11-08","v":13},{"dag":"2026-11-09","v":15},{"dag":"2026-11-10","v":19}],"videoweergaven":[{"dag":"2026-10-14","v":100},{"dag":"2026-10-15","v":128},{"dag":"2026-10-16","v":143},{"dag":"2026-10-17","v":141},{"dag":"2026-10-18","v":121},{"dag":"2026-10-19","v":96},{"dag":"2026-10-20","v":77},{"dag":"2026-10-21","v":75},{"dag":"2026-10-22","v":91},{"dag":"2026-10-23","v":119},{"dag":"2026-10-24","v":146},{"dag":"2026-10-25","v":162},{"dag":"2026-10-26","v":158},{"dag":"2026-10-27","v":139},{"dag":"2026-10-28","v":113},{"dag":"2026-10-29","v":95},{"dag":"2026-10-30","v":93},{"dag":"2026-10-31","v":109},{"dag":"2026-11-01","v":137},{"dag":"2026-11-02","v":165},{"dag":"2026-11-03","v":180},{"dag":"2026-11-04","v":176},{"dag":"2026-11-05","v":156},{"dag":"2026-11-06","v":131},{"dag":"2026-11-07","v":112},{"dag":"2026-11-08","v":111},{"dag":"2026-11-09","v":128},{"dag":"2026-11-10","v":156}]},"bereikWeek":1210},"ig":{"user":"demo","volgers":512,"posts":48,"week":{"reach":2380,"views":4120,"profile_views":96,"accounts_engaged":140,"total_interactions":210,"likes":170,"comments":22,"shares":9,"saves":9,"website_clicks":14},"vorige":{"reach":2010,"views":3480,"profile_views":80,"accounts_engaged":118,"total_interactions":175,"likes":140,"comments":18,"shares":8,"saves":9,"website_clicks":11},"bereikWeek":2380,"reeks":{"bereik":[{"dag":"2026-10-14","v":320},{"dag":"2026-10-15","v":397},{"dag":"2026-10-16","v":441},{"dag":"2026-10-17","v":434},{"dag":"2026-10-18","v":382},{"dag":"2026-10-19","v":313},{"dag":"2026-10-20","v":263},{"dag":"2026-10-21","v":257},{"dag":"2026-10-22","v":302},{"dag":"2026-10-23","v":379},{"dag":"2026-10-24","v":456},{"dag":"2026-10-25","v":499},{"dag":"2026-10-26","v":491},{"dag":"2026-10-27","v":438},{"dag":"2026-10-28","v":369},{"dag":"2026-10-29","v":319},{"dag":"2026-10-30","v":315},{"dag":"2026-10-31","v":361},{"dag":"2026-11-01","v":439},{"dag":"2026-11-02","v":515},{"dag":"2026-11-03","v":557},{"dag":"2026-11-04","v":547},{"dag":"2026-11-05","v":494},{"dag":"2026-11-06","v":425},{"dag":"2026-11-07","v":376},{"dag":"2026-11-08","v":373},{"dag":"2026-11-09","v":420},{"dag":"2026-11-10","v":498}]},"postsWeek":4,"media":[]},"fouten":[],"geschiedenis":[]},"koppelingen":[["Outlook / agenda","ok"],["WhatsApp Business","ok"],["Websiteformulier","ok"],["Facebook / Instagram","ok"],["Boekhouding","ok"]],"todos":[{"id":"t1","tekst":"Offerte De Vries afmaken","kanaal":"make","klaar":false,"bron":"dashboard"},{"id":"t2","tekst":"Sanne K. terugbellen over schuurtje","kanaal":"mail","klaar":false,"bron":"dashboard"},{"id":"t3","tekst":"Materiaal bestellen badkamer Bakker","kanaal":"algemeen","klaar":false,"bron":"dashboard"},{"id":"t4","tekst":"Factuur Jansen versturen na klus","kanaal":"algemeen","klaar":false,"bron":"dashboard"}],"kpis":[{"naam":"Klussen (pilot-vak)","kanaal":"algemeen","hoofd":false,"waarde":14,"doel":15,"periode":"week"},{"naam":"Omzet deze maand","kanaal":"algemeen","hoofd":true,"waarde":18450,"doel":22000,"periode":"maand"},{"naam":"Nieuwe aanvragen","kanaal":"mail","hoofd":true,"waarde":21,"doel":25,"periode":"maand"},{"naam":"Offertes verstuurd","kanaal":"make","hoofd":true,"waarde":14,"doel":15,"periode":"maand"},{"naam":"Offertes geaccepteerd","kanaal":"make","hoofd":true,"waarde":9,"doel":10,"periode":"maand"},{"naam":"Openstaande facturen","kanaal":"make","hoofd":true,"waarde":3,"doel":2,"periode":"nu","lagerIsBeter":true},{"naam":"Afspraken deze week","kanaal":"agenda","hoofd":true,"waarde":11,"doel":12,"periode":"week"},{"naam":"Aanvragen zonder antwoord","kanaal":"mail","hoofd":false,"waarde":1,"doel":0,"periode":"nu","lagerIsBeter":true},{"naam":"Automatisch afgehandeld","kanaal":"make","hoofd":false,"waarde":33,"doel":30,"periode":"week"},{"naam":"Volgers Instagram","kanaal":"marketing","hoofd":false,"waarde":512,"doel":600,"periode":"totaal"},{"naam":"Volgers Facebook","kanaal":"marketing","hoofd":false,"waarde":286,"doel":300,"periode":"totaal"},{"naam":"Google-reviews","kanaal":"marketing","hoofd":false,"waarde":4.8,"doel":5,"periode":"gemiddeld"},{"naam":"Websitebezoekers","kanaal":"marketing","hoofd":false,"waarde":640,"doel":800,"periode":"maand"},{"naam":"Website-aanvragen","kanaal":"marketing","hoofd":false,"waarde":8,"doel":10,"periode":"maand"}],"post":null,"klanten":null,"weekoverzicht":null,"claude":"ok","opdrachten":[],"doorsturen":true};
+window.__ANTWOORD=function(t){t=String(t||'').toLowerCase();
+ if(/vandaag|planning|agenda|afspra/.test(t))return 'Vandaag heeft u drie afspraken. Om acht uur de lekkende kraan bij familie Jansen in Someren, om half twaalf de dakkapel opmeten in Asten en om drie uur de badkamer bespreken in Lierop.';
+ if(/aanvra|inbox|mail/.test(t))return 'Er zijn drie nieuwe aanvragen binnen: een dakkapel via de mail, een badkamer via het websiteformulier en een vraag over een schuurtje via Facebook. Eén aanvraag wacht al twee dagen op antwoord.';
+ if(/automatiser|scenario/.test(t))return 'Vier automatiseringen draaien zonder fouten: klantaanvragen, afspraakherinneringen, offertes klaarzetten en bonnetjes. Deze week is er 33 keer werk automatisch afgehandeld.';
+ if(/offerte/.test(t))return 'Deze maand zijn er veertien offertes verstuurd en negen geaccepteerd. De offerte voor De Vries staat nog open.';
+ if(/omzet|geld|factu|bedrijf|kpi|doel/.test(t))return 'De omzet staat deze maand op achttienduizend vierhonderdvijftig euro, van een doel van tweeëntwintigduizend. Er staan nog drie facturen open.';
+ if(/social|instagram|facebook|bereik/.test(t))return 'Instagram had deze week ruim vierduizend weergaven, achttien procent meer dan vorige week.';
+ return 'Dit is een demo met fictieve gegevens. Vraag bijvoorbeeld wat er vandaag op de planning staat, hoeveel nieuwe aanvragen er zijn of hoe het met de offertes gaat.'};
+window.fetch=async(u,o={})=>{u=String(u);const b=o.body?JSON.parse(o.body):{},D=window.__DEMO;let r={ok:true};
+ if(u.startsWith('/api/state'))r=JSON.parse(JSON.stringify(D));
+ else if(u.startsWith('/api/spotify'))r={};
+ else if(u==='/api/ask')r={antwoord:window.__ANTWOORD(b.tekst+' '+(b.kanaal||''))};
+ else if(u==='/api/todo'&&b.tekst)D.todos.unshift({id:'n'+Date.now(),tekst:b.tekst,kanaal:b.kanaal||'algemeen',klaar:false,bron:'dashboard'});
+ else if(u.startsWith('/api/todo/')){const t=D.todos.find(t=>t.id===u.slice(10));if(t)t.klaar=!t.klaar}
+ return {ok:true,status:200,json:async()=>r}};
+try{localStorage.setItem('vlotGemeld','[]')}catch{}
+</script>
+<script>
+/* ======= CONFIG: pas hier kanalen, opties en achtergrond aan ======= */
+const CONFIG = {
+  kanalen: [
+    {id:"marketing", label:"SOCIALS", ico:"&#9650;", sub:"bereik", x:130, y:205, widget:"socials", knoppen:[], opties:[
+      {naam:"Socials", widget:"socials", kpis:["Volgers Instagram","Volgers Facebook"], zoek:"post|social", vraag:""},
+      {naam:"Reviews", kpis:["Google-reviews"], zoek:"review", vraag:""},
+      {naam:"Website", kpis:["Websitebezoekers","Website-aanvragen"], zoek:"website", vraag:""}]},
+    {id:"make", label:"AUTOMATISERINGEN", ico:"&#9881;", sub:"draait", x:1470, y:205, widget:"scenarios", knoppen:[], opties:[
+      {naam:"Scenario's", widget:"scenarios", kpis:["Automatisch afgehandeld"], vraag:""},
+      {naam:"Offertes", kpis:["Offertes verstuurd","Offertes geaccepteerd"], zoek:"offerte", vraag:""},
+      {naam:"Facturen", kpis:["Openstaande facturen"], zoek:"factuur", vraag:""}]},
+    {id:"algemeen", label:"BEDRIJF", ico:"&#9672;", sub:"overzicht", x:800, y:78, knoppen:[], opties:[
+      {naam:"To-do's", todos:"alle", kpis:[], vraag:""},
+      {naam:"KPI's", kpis:"alle", todos:"geen", vraag:""},
+      {naam:"Omzet", kpis:["Omzet deze maand","Offertes geaccepteerd"], zoek:"omzet|factuur", vraag:""}]},
+    {id:"agenda", label:"AGENDA", ico:"&#9719;", sub:"vandaag", x:130, y:560, widget:"agenda", knoppen:[], opties:[
+      {naam:"Vandaag", widget:"agenda", kpis:[], vraag:""},
+      {naam:"Deze week", widget:"week", kpis:["Afspraken deze week"], vraag:""}]},
+    {id:"mail", label:"AANVRAGEN", ico:"&#9993;", sub:"inbox", x:1470, y:560, widget:"mail", knoppen:[], opties:[
+      {naam:"Inbox", widget:"mail", kpis:["Nieuwe aanvragen"], vraag:""},
+      {naam:"Opvolgen", widget:"opvolgen", kpis:["Aanvragen zonder antwoord"], zoek:"bel|opvolg", vraag:""}]}
+  ],
+  /* Zet afbeeldingen (bijv. van Pinterest) in de map VLOT/achtergrond en zet de bestandsnamen hier */
+  /* Stem van VLOT: eerste beschikbare uit voorkeur. snelheid 1 = normaal, toon 1 = normaal */
+  stem: {voorkeur:["Maarten","Fenna","Colette"], snelheid:1.05, toon:1},
+  achtergrond: [],
+  /* Status van koppelingen – later live */
+  koppelingen: [["Outlook / agenda","ok"],["WhatsApp Business","ok"],["Websiteformulier","ok"],["Facebook / Instagram","ok"],["Boekhouding","ok"]]
+};
+/* Voorbeelddata – later live uit agenda, mail, Make en chats */
+const BRIEF = {
+  vandaag:["10:00 Belafspraak potentiële klant","13:30 Enquête-respondenten nabellen","Dagelijkse FB/IG-post controleren"],
+  veranderd:["Make: klantopvolging 3× gedraaid, 1 fout","2 nieuwe mails van klanten","MARKETING: nieuwe Vaktijd-video klaar","Instagram-bereik +12% deze week"],
+  let:["Scenario afspraakherinnering nog niet getest"]
+};
+/* =================================================================== */
+
+const stage=document.getElementById('stage'),world=document.getElementById('world'),wires=document.getElementById('wires');
+function fit(){const s=Math.min(innerWidth/1600,innerHeight/900);stage.style.transform=`translate(-50%,-50%) scale(${s})`}
+fit();addEventListener('resize',fit);
+const $=(h)=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstChild};
+function add(h,ch){const e=$(h);if(ch)e.dataset.ch=ch;e.classList.add('fade');world.appendChild(e);return e}
+function wire(d,ch){const p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d',d);p.setAttribute('class','wire fade');if(ch)p.dataset.ch=ch;wires.appendChild(p);return p}
+function box(x,y,w,h,t,id,inner,ch){return add(`<div class="box" data-t="${t}" data-id="${id}" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px">${inner}</div>`,ch)}
+
+/* ---- Kanalen + subopties ---- */
+CONFIG.kanalen.forEach(k=>{
+  const el=add(`<div class="node" style="left:${k.x}px;top:${k.y}px"><div class="ring">${k.badge?`<span class="badge">${k.badge}</span>`:''}<div class="ico">${k.ico}</div><div class="lbl">${k.label}</div><div class="sub">${k.sub}</div></div></div>`,k.id);
+  k.el=el;
+  el.onclick=e=>{e.stopPropagation();if(zoomed===k&&k.chat){say('In de demo is er geen chat. In jouw eigen dashboard opent deze knop de bijbehorende omgeving.')}else zoomTo(k)};
+  k.opties.forEach((o,i)=>{
+    const a=-Math.PI/2+i*2*Math.PI/k.opties.length,ox=k.x+Math.cos(a)*175,oy=k.y+Math.sin(a)*175;
+    wire(`M${k.x},${k.y} L${ox},${oy}`,'sub-'+k.id).classList.add('hidden');
+    const s=add(`<div class="node small hidden" style="left:${ox}px;top:${oy}px"><div class="ring"><div class="ico">&#9670;</div><div class="lbl">${o.naam.toUpperCase()}</div></div></div>`,'sub-'+k.id);
+    s.onclick=e=>{e.stopPropagation();tabKlik(k,o)};
+  });
+});
+
+/* ---- Widgets bij de kanalen ---- */
+// Marketing: kijkcijfers
+box(215,118,290,180,'SOCIALS · WEERGAVEN 7D','MKT-7',`<div class="mono down" id="mktnote" style="position:absolute;right:12px;top:150px">VOORBEELD · NIET GEKOPPELD</div><div class="row"><span><span class="dot"></span>Instagram</span><span class="k" id="igv">0</span><span id="igp" class="up mono"></span></div>
+ <div class="row"><span><span class="dot w"></span>Facebook</span><span class="k" id="fbv">0</span><span id="fbp" class="down mono"></span></div><canvas id="mktc" width="266" height="70"></canvas>`,'marketing');
+wire('M186,205 H215','marketing');
+// Make
+box(1095,118,290,180,'AUTOMATISERINGEN','MK-02',`<div id="scen"></div><div class="mono" style="margin-top:4px;opacity:.7">AFGEHANDELD VANDAAG</div><canvas id="opsc" width="266" height="40"></canvas>`,'make');
+wire('M1414,205 H1385','make');
+// Agenda
+box(215,478,290,170,'AGENDA · VANDAAG','AGD-4',`<canvas id="agc" width="266" height="122"></canvas>`,'agenda');
+wire('M186,560 H215','agenda');
+// Mail
+box(1095,478,290,170,'AANVRAGEN · INBOX','ML-09',`<div class="row"><span>Nieuw</span><span class="k" id="mailn">–</span></div>
+ <div class="mono" id="maill" style="line-height:1.7;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>`,'mail');
+wire('M1414,560 H1385','mail');
+// Algemeen: twee kleine stat-vakken
+box(560,22,170,92,'KLUSSEN','GEN-1',`<div class="k" id="pil">–</div><div class="mono" id="pild">DOEL 3</div>`,'algemeen');
+box(870,22,170,92,'TO-DO OPEN','GEN-2',`<div class="k" id="omz">0</div><div class="minibar"><i id="omzb" style="width:0%"></i></div>`,'algemeen');
+wire('M744,78 H730','algemeen');wire('M856,78 H870','algemeen');
+
+/* ---- Decoratieve vakken ---- */
+add(`<canvas class="abs deco" id="radar" width="120" height="120" style="left:70px;top:325px"></canvas>`);
+box(215,306,290,164,'TO-DO','TDO-1',`<div id="todo" style="font-size:13px;line-height:1.25;height:104px;overflow:hidden"></div>
+ <input id="todoIn" placeholder="+ taak toevoegen (Enter)" style="width:100%;margin-top:3px;background:#03203a;border:1px solid #3fd0ff55;color:var(--txt);font:12px 'Share Tech Mono';padding:2px 6px">`);
+add(`<canvas class="abs deco" id="gauge" width="120" height="120" style="left:1410px;top:325px"></canvas>`);
+box(1095,306,290,164,'KPI\'S','KPI-1',`<div id="kpi" style="font-size:12px"></div><canvas id="netc" width="0" height="0"></canvas>`);
+box(20,14,180,84,'LOKALE TIJD','CLK',`<div class="k" id="time" style="font-size:24px">--:--</div><div class="mono" id="date"></div>`);
+box(1400,14,180,84,'SYSTEEM','CPU',`<div id="bars"></div>`);
+box(20,690,280,190,'ACTIVITEIT','LOG-1',`<div id="feedList" style="font-size:14px;line-height:1.55"></div>`);
+box(1300,690,280,190,'KOPPELINGEN','LNK',`<div id="links"></div>`);
+
+/* ---- Snelknoppen rond de kanalen (CONFIG.kanalen[].knoppen) ---- */
+CONFIG.kanalen.forEach(k=>(k.knoppen||[]).forEach((b,i)=>{
+  const e=add(`<div class="qbtn" style="left:${b.x??k.x}px;top:${b.y??k.y+70+i*30}px">${String(b.tekst).replace(/[&<>"]/g,"").toUpperCase()}</div>`,k.id);
+  e.onclick=ev=>{ev.stopPropagation();if(b.link){window.open(b.link,'_blank');log('Geopend: '+b.tekst);return}
+    api('/api/opdracht','POST',{kanaal:k.id,tekst:b.opdracht}).then(()=>{say(`${b.tekst}: doorgezet naar ${k.label.toLowerCase()}, meneer.`);load()})}}));
+
+/* ---- Zoom ---- */
+let zoomed=null;
+function zoomTo(k){
+  zoomed=k;const s=1.5;
+  world.style.transform=`translate(${560-k.x*s}px,${450-k.y*s}px) scale(${s})`;
+  world.querySelectorAll('.fade').forEach(e=>{const c=e.dataset.ch;e.classList.toggle('hidden',!(c===k.id&&e.classList.contains('node')||c==='sub-'+k.id))});
+  document.getElementById('back').classList.remove('off');
+  document.getElementById('crumb').textContent='PROCESVLOT / '+k.label;
+  log('Kanaal geopend: '+k.label);openPanel(k);document.body.classList.add('ingezoomd');
+}
+function zoomOut(){
+  zoomed=null;world.style.transform='';
+  world.querySelectorAll('.fade').forEach(e=>e.classList.toggle('hidden',(e.dataset.ch||'').startsWith('sub-')));
+  document.getElementById('back').classList.add('off');document.getElementById('crumb').textContent='';cp.classList.add('off');cpK=null;document.body.classList.remove('ingezoomd');
+}
+document.getElementById('back').onclick=zoomOut;
+addEventListener('keydown',e=>{if(e.key==='Escape'){zoomOut();bp.classList.add('off'),document.body.classList.remove('paneel')}});
+
+/* ---- Spraak ---- */
+const core=document.getElementById('core'),state=document.getElementById('coreState'),tr=document.getElementById('transcript');
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let rec=null,listening=false;
+function setState(s,t){core.className=s;state.textContent=t}
+/* Stem: in Edge zijn de natuurlijke (neurale) stemmen gratis. Wisselen: zeg "stem Maarten", "stem Colette" of "stem Fenna" */
+let stemNaam=null;try{stemNaam=localStorage.getItem('vlotStem')}catch{}
+function voice(){const v=speechSynthesis.getVoices().filter(x=>/^nl/i.test(x.lang)),nat=v.filter(x=>/Natural|Online/i.test(x.name));
+  const zoek=n=>nat.find(x=>x.name.includes(n))||v.find(x=>x.name.includes(n));
+  return (stemNaam&&zoek(stemNaam))||CONFIG.stem.voorkeur.map(zoek).find(Boolean)||nat[0]||v.find(x=>/Microsoft/i.test(x.name))||v[0]}
+speechSynthesis.onvoiceschanged=()=>{const v=voice();if(v)log('Stem: '+v.name.replace(/Microsoft |Online |\(Natural\)| - .*/g,'').trim())};
+/* Muziek zachter (of op pauze) zolang VLOT luistert of praat */
+let geduckt=false,sayId=0,trTimer=null;
+function duck(){if(geduckt||!SPO.speelt)return Promise.resolve();geduckt=true;return api('/api/spotify/duck','POST').catch(()=>{})}
+function unduck(geenPlay){if(!geduckt)return Promise.resolve();geduckt=false;return api('/api/spotify/unduck','POST',{geenPlay:!!geenPlay}).then(()=>setTimeout(spLoad,600)).catch(()=>{})}
+function say(t,show=true){
+  clearTimeout(trTimer);tr.classList.remove('weg');tr.innerHTML=show?t:'';speechSynthesis.cancel();duck();
+  /* alleen het eigen antwoord uitspreken, niet wat de gebruiker zei */
+  const tekst=t.replace(/<div class="you">[\s\S]*?<\/div>/g,'').replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').trim(),v=voice();
+  /* per zin uitspreken: begint sneller en online stemmen breken lange teksten anders af */
+  const zinnen=tekst.match(/[^.!?]+[.!?]*\s*/g)||[tekst],id=++sayId,klaar=()=>{if(id!==sayId)return;setState('','KLIK OM TE PRATEN');unduck();trTimer=setTimeout(()=>{tr.classList.add('weg');setTimeout(()=>{if(id===sayId)tr.innerHTML=''},600)},7000)};
+  zinnen.forEach((z,i)=>{const u=new SpeechSynthesisUtterance(z.trim());u.lang='nl-NL';if(v)u.voice=v;u.rate=CONFIG.stem.snelheid;u.pitch=CONFIG.stem.toon;
+    if(i===0)u.onstart=()=>setState('thinking','SPREEKT');if(i===zinnen.length-1){u.onend=klaar;u.onerror=klaar}speechSynthesis.speak(u)});
+}
+core.onclick=()=>{
+  if(!SR){answer('Wat staat er vandaag op de planning?');return}
+  if(listening){rec.stop();return}
+  rec=new SR();rec.lang='nl-NL';rec.interimResults=true;
+  let gehoord=false;
+  rec.onstart=()=>{listening=true;setState('listening','LUISTERT…');duck()};
+  rec.onresult=e=>{const t=[...e.results].map(r=>r[0].transcript).join('');tr.innerHTML=`<div class="you">${t}</div>`;if(e.results[e.results.length-1].isFinal){gehoord=true;answer(t)}};
+  rec.onend=()=>{listening=false;if(core.className==='listening')setState('','KLIK OM TE PRATEN');if(!gehoord)unduck()};
+  rec.start();
+};
+function answer(t){
+  setState('thinking','DENKT NA…');log('Vraag: '+t);duck();
+  const k=CONFIG.kanalen.find(k=>t.toLowerCase().includes(k.label.toLowerCase().split(' ')[0]));
+  const tl=t.toLowerCase();
+  if(k&&/^(open|ga naar|toon|laat .* zien)/.test(tl)){say(`${k.label[0]+k.label.slice(1).toLowerCase()}, meneer.`);zoomTo(k);return}
+  if(/dagupdate|update van vandaag|wat moet ik vandaag/.test(tl)){openBrief();return}
+  if(/weekoverzicht|overzicht van de week|hoe was (mijn|de) week/.test(tl)){openWeek();return}
+  const sm=tl.match(/\bstem (fenna|colette|maarten)\b/);if(sm){stemNaam=sm[1][0].toUpperCase()+sm[1].slice(1);try{localStorage.setItem('vlotStem',stemNaam)}catch{};say(voice()?.name.includes(stemNaam)?`Hoi, ik ben ${stemNaam}. Zo klink ik vanaf nu.`:`De stem ${stemNaam} is hier niet beschikbaar. Open VLOT via het dashboard in Edge.`);return}
+  if(/^(terug|sluit|uitzoomen)/.test(tl)){zoomOut();bp.classList.add('off'),document.body.classList.remove('paneel');say('Zoals u wilt.');return}
+  if(SPO.gekoppeld){
+    if(/volgende (nummer|liedje)|skip/.test(tl)){unduck().then(()=>spDo('next'));setState('','KLIK OM TE PRATEN');return}
+    if(/vorige (nummer|liedje)/.test(tl)){unduck().then(()=>spDo('previous'));setState('','KLIK OM TE PRATEN');return}
+    if(/^(pauze|pauzeer|stop (de )?muziek|muziek uit)/.test(tl)){unduck(true).then(()=>spDo('pause'));setState('','KLIK OM TE PRATEN');return}
+    if(/^(speel( verder)?|muziek aan|play)$/.test(tl)){unduck().then(()=>spDo('play'));setState('','KLIK OM TE PRATEN');return}
+    if(/wat (speelt|hoor ik)|welk (nummer|liedje)/.test(tl)){say(SPO.titel?`U luistert naar ${SPO.titel} van ${SPO.artiest}, meneer.`:'Er speelt op dit moment niets.');return}
+  }
+  if(!LIVE){say(`<div class="you">${esc(t)}</div>Daarvoor moet ik via het dashboard gestart zijn, meneer.`);return}
+  api('/api/ask','POST',{tekst:t,kanaal:zoomed?.id}).then(r=>{say(`<div class="you">${esc(t)}</div>${esc(r.antwoord)}`);load()}).catch(()=>say('Ik kan de VLOT-server niet bereiken, meneer. Start hem via het dashboard.'));
+}
+
+/* ---- Dagupdate ---- */
+const bp=document.getElementById('briefPanel');
+function groet(){const h=new Date().getHours();return h<6?'Goedenacht':h<12?'Goedemorgen':h<18?'Goedemiddag':'Goedenavond'}
+function openWeek(){const w=LIVE?.weekoverzicht;
+  if(!w){say('Er is nog geen weekoverzicht, meneer. Dat verschijnt vrijdagmiddag.');return}
+  document.getElementById('briefBody').innerHTML=`<div class="k" style="font-size:18px;letter-spacing:2px">WEEKOVERZICHT · ${esc(w.week)}</div><p style="font-size:16px;opacity:.85">${esc(w.samenvatting||'')}</p><h3>WAT ER VERANDERDE</h3><ul>${(w.punten||[]).map(p=>'<li>'+esc(p)+'</li>').join('')}</ul>${(w.aandacht||[]).length?'<h3>VOLGENDE WEEK</h3><ul>'+w.aandacht.map(p=>'<li class="w">'+esc(p)+'</li>').join('')+'</ul>':''}`;
+  bp.classList.remove('off');document.body.classList.add('paneel');say(`Het weekoverzicht, meneer. ${w.samenvatting||''} ${(w.punten||[]).join('. ')}.${(w.aandacht||[]).length?' Voor volgende week: '+w.aandacht.join('. ')+'.':''}`,false)}
+const kNaam=id=>{const k=CONFIG.kanalen.find(k=>k.id===id)?.label||id;return k[0]+k.slice(1).toLowerCase()};
+function openBrief(){
+  (LIVE?.waarschuwingen||[]).forEach(w=>{if(!BRIEF.let.includes(w.tekst))BRIEF.let.push(w.tekst)});
+  const ops=LIVE?.opdrachten||[],gedaan=ops.filter(o=>o.status==='klaar'&&Date.now()-Date.parse(o.aangemaakt)<864e5),lopend=ops.filter(o=>o.status!=='klaar'&&Date.now()-Date.parse(o.aangemaakt)<3*864e5);
+  const kl=LIVE?.klanten;if(kl?.nabellen&&!BRIEF.vandaag.some(x=>/nabellen/i.test(x)))BRIEF.vandaag.unshift(`${kl.nabellen} bedrijven nabellen, te beginnen met ${kl.nuBellen.slice(0,2).map(x=>x.naam).join(' en ')}`);
+  const L=a=>a.map(x=>`<li>${x}</li>`).join('');
+  document.getElementById('briefBody').innerHTML=`<div class="k" style="font-size:18px;letter-spacing:2px">${new Date().toLocaleDateString('nl-NL',{weekday:'long',day:'numeric',month:'long'}).toUpperCase()}</div>
+   <h3>VANDAAG TE DOEN</h3><ul>${L(BRIEF.vandaag)}</ul><h3>WAT ER IS VERANDERD</h3><ul>${L(BRIEF.veranderd)}</ul>
+   <h3>LET OP</h3><ul>${BRIEF.let.map(x=>`<li class="w">${x}</li>`).join('')}</ul>${gedaan.length?`<h3>VIA VLOT GEDAAN (24 UUR)</h3><ul>${gedaan.map(o=>`<li>${esc(kNaam(o.kanaal))}: ${esc(o.resultaat)}</li>`).join('')}</ul>`:''}${lopend.length?`<h3>LOOPT NOG</h3><ul>${lopend.map(o=>`<li>${esc(kNaam(o.kanaal))}: ${esc(o.tekst.slice(0,90))}</li>`).join('')}</ul>`:''}`;
+  bp.classList.remove('off');document.body.classList.add('paneel');
+  const vg=gedaan.length?` Via mij is in het afgelopen etmaal ${gedaan.length===1?'één opdracht':gedaan.length+' opdrachten'} afgerond${lopend.length?', en '+(lopend.length===1?'er loopt er nog één':'er lopen er nog '+lopend.length):''}.`:lopend.length?` Er ${lopend.length===1?'loopt nog één opdracht':'lopen nog '+lopend.length+' opdrachten'} bij de chats.`:'';
+  say(`${groet()}, meneer. U heeft vandaag ${BRIEF.vandaag.length} punten op de planning, te beginnen met: ${BRIEF.vandaag[0]}. Sinds de vorige update: ${BRIEF.veranderd.join('. ')}.${BRIEF.let[0]?' Eén aandachtspunt: '+BRIEF.let[0]+'.':''}${vg}`,false);
+}
+document.getElementById('platform').onclick=()=>bp.classList.contains('off')?openBrief():(bp.classList.add('off'),document.body.classList.remove('paneel'),speechSynthesis.cancel());
+bp.querySelector('.close').onclick=()=>{bp.classList.add('off'),document.body.classList.remove('paneel');speechSynthesis.cancel()};
+document.getElementById('platSub').textContent=`${BRIEF.vandaag.length} taken · ${BRIEF.veranderd.length} wijzigingen`;
+
+/* ---- Koppelingen ---- */
+const LS={ok:['','GEKOPPELD'],let:['w','LET OP'],nee:['b','NIET GEKOPPELD']};
+document.getElementById('links').innerHTML=CONFIG.koppelingen.map(([n,s])=>`<div class="row"><span><span class="dot ${LS[s][0]}"></span>${n}</span><span class="mono ${s==='ok'?'up':'down'}">${LS[s][1]}</span></div>`).join('');
+
+/* ---- Feed, log, klok, balken ---- */
+const fl=document.getElementById('feedList');
+function log(t){const d=document.createElement('div');d.style.animation='fadein .6s';d.textContent=new Date().toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'})+'  '+t;fl.prepend(d);while(fl.children.length>7)fl.lastChild.remove()}
+['Systeem opgestart','Make-status opgehaald','Agenda gesynchroniseerd','Mail gecontroleerd'].forEach(log);
+function tick(){const d=new Date();document.getElementById('time').textContent=d.toLocaleTimeString('nl-NL');document.getElementById('date').textContent=d.toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'short'}).toUpperCase()}
+setInterval(tick,1000);tick();
+const SB=[["CPU",30],["RAM",58],["NET",44]];
+document.getElementById('bars').innerHTML=SB.map(([n,v])=>`<div class="row mono" style="padding:0"><span>${n}</span></div><div class="minibar"><i style="width:${v}%"></i></div>`).join('');
+setInterval(()=>document.querySelectorAll('#bars i').forEach((b,i)=>{b.style.width=Math.max(5,Math.min(100,SB[i][1]+(Math.random()*16-8)))+'%'}),1500);
+
+/* ---- Live data van de VLOT-server (data/state.json, todos.json, kpis.json) ---- */
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let LIVE=null,kpiScore=.75,AG=[],opsGezien=null,meldStraks=null;
+function markeer(ids){try{const g=JSON.parse(localStorage.getItem('vlotGemeld')||'[]');localStorage.setItem('vlotGemeld',JSON.stringify([...g,...ids].slice(-300)))}catch{}}
+addEventListener('pointerdown',()=>{if(meldStraks){const m=meldStraks;meldStraks=null;markeer(m.ids);setTimeout(()=>say(m.tekst),400)}},true);
+function renderKoppelingen(){document.getElementById('links').innerHTML=CONFIG.koppelingen.map(([n,s])=>`<div class="row"><span><span class="dot ${LS[s][0]}"></span>${n}</span><span class="mono ${s==='ok'?'up':'down'}">${LS[s][1]}</span></div>`).join('')}
+function setBadge(id,n){const k=CONFIG.kanalen.find(k=>k.id===id);if(!k)return;let b=k.el.querySelector('.badge');if(!n){b&&b.remove();return}if(!b){b=document.createElement('span');b.className='badge';k.el.querySelector('.ring').prepend(b)}b.textContent=n}
+function render(d){
+  LIVE=d;
+  if(d.brief){BRIEF.vandaag=d.brief.vandaag||[];BRIEF.veranderd=d.brief.veranderd||[];BRIEF.let=d.brief.let||[]}
+  document.getElementById('platSub').textContent=`${BRIEF.vandaag.length} taken · ${BRIEF.veranderd.length} wijzigingen`;
+  if(d.koppelingen){const claude=d.claude==='nee'?'nee':d.claude==='let'?'let':d.claude==='ok'?'ok':'let';
+    CONFIG.koppelingen=d.koppelingen.map(([n,s])=>n.startsWith('Claude')?[n,claude]:n.startsWith('Spotify')&&analyser?[n,'ok']:[n,s]);renderKoppelingen()}
+  if(d.make){const sc=d.make.scenarios||[];document.getElementById('scen').innerHTML=sc.slice(0,4).map(s=>`<div class="row" style="font-size:13px"><span><span class="dot ${LS[s.status]?.[0]??''}"></span>${esc(s.naam)}</span><span class="mono">${esc(s.label)}</span></div>`).join('');
+    setBadge('make',sc.filter(s=>s.status==='nee').length)}
+  if(d.mail){document.getElementById('mailn').textContent=d.mail.ongelezen;document.getElementById('maill').innerHTML=(d.mail.recent||[]).slice(0,4).map(m=>'▸ '+esc(m.onderwerp)).join('<br>');
+    setBadge('mail',d.mail.ongelezen);CONFIG.kanalen.find(k=>k.id==='mail').el.querySelector('.sub').textContent=d.mail.ongelezen?d.mail.ongelezen+' nieuw':'inbox leeg'}
+  if(d.agenda){const td=new Date().toISOString().slice(0,10),h=s=>{const[a,b]=s.split(':');return +a+b/60};
+    const vandaag=d.agenda.filter(a=>a.dag===td);AG=(vandaag.length?vandaag:d.agenda.slice(0,3)).slice(0,3).map(a=>[h(a.start),h(a.eind),(a.dag===td?'':a.dag.slice(8)+'/'+a.dag.slice(5,7)+' ')+a.titel]);
+    CONFIG.kanalen.find(k=>k.id==='agenda').el.querySelector('.sub').textContent='vandaag '+vandaag.length;agDraw()}
+  const todos=(d.todos||[]).filter(t=>!t.klaar);
+  document.getElementById('todo').innerHTML=todos.slice(0,5).map(t=>`<div class="row" style="padding:1px 0;cursor:pointer" data-id="${t.id}"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px"><span class="dot ${t.bron==='voorstel'?'w':''}"></span>${esc(t.tekst)}</span><span class="mono">${esc(t.kanaal).slice(0,4).toUpperCase()}</span></div>`).join('')||'<div class="mono">Alles gedaan</div>';
+  document.querySelectorAll('#todo [data-id]').forEach(r=>r.onclick=()=>api('/api/todo/'+r.dataset.id,'PATCH').then(()=>{log('Taak afgevinkt');load()}));
+  document.getElementById('omz').textContent=todos.length;document.getElementById('omzb').style.width=Math.min(100,todos.length*10)+'%';
+  const kp=d.kpis||[];
+  document.getElementById('kpi').innerHTML=kp.filter(k=>k.hoofd).slice(0,6).map(k=>{const v=k.waarde,p=v==null?0:k.lagerIsBeter?(v<=k.doel?1:Math.max(0,1-(v-k.doel)/5)):Math.min(1,v/k.doel);
+    return `<div class="row" style="padding:0"><span>${esc(k.naam)}</span><span class="mono">${v??'–'} / ${k.doel}</span></div><div class="minibar" style="margin:1px 0 2px"><i style="width:${p*100}%${p<.5?';background:var(--warn)':''}"></i></div>`}).join('');
+  const met=kp.filter(k=>k.hoofd&&k.waarde!=null&&k.doel!=null);kpiScore=met.length?met.reduce((s,k)=>s+(k.lagerIsBeter?(k.waarde<=k.doel?1:0):Math.min(1,k.waarde/k.doel)),0)/met.length:0;
+  const pil=kp.find(k=>/pilot/i.test(k.naam));if(pil){document.getElementById('pil').textContent=pil.waarde??'–';document.getElementById('pild').textContent='DOEL '+pil.doel}
+  if(d.klanten&&!d.klanten.fout){setBadge('algemeen',d.klanten.nabellen);CONFIG.kanalen.find(k=>k.id==='algemeen').el.querySelector('.sub').textContent=d.klanten.nabellen?d.klanten.nabellen+' nabellen':'bedrijf'}
+  if(d.socials&&!d.socials.fout){SOC=d.socials;const mn=document.getElementById('mktnote');mn.textContent='BEREIK PER DAG · 28 D';mn.className='mono';mn.style.opacity=.5;mkt()}
+  if(cpK&&!cp.contains(document.activeElement))renderPanel();
+  /* waarschuwingen + nieuw weekoverzicht: één keer melden. Browsers laten spraak pas toe na een klik, dus zo nodig wacht het tot de eerste klik */
+  let gez=[];try{gez=JSON.parse(localStorage.getItem('vlotGemeld')||'[]')}catch{}
+  const wo=d.weekoverzicht,meld=[...(d.waarschuwingen||[])];if(wo?.week&&Date.now()-Date.parse(wo.gemaakt)<4*864e5)meld.push({id:'week-'+wo.week,tekst:'Het weekoverzicht staat klaar. Zeg weekoverzicht om het te horen',week:true});
+  const nieuw=meld.filter(w=>!gez.includes(w.id)&&!meldStraks?.ids.includes(w.id));
+  if(nieuw.length){nieuw.forEach(w=>log((w.week?'Weekoverzicht klaar':'Let op: ')+(w.week?'':w.tekst.slice(0,55))));
+    const tekst=(nieuw.length>1?'Meneer, '+nieuw.length+' punten. ':'Meneer. ')+nieuw.map(w=>w.tekst).join('. ')+'.';
+    const ids=nieuw.map(w=>w.id);
+    if(navigator.userActivation?.hasBeenActive&&!speechSynthesis.speaking){say(tekst);markeer(ids)}else meldStraks={tekst,ids}}
+  /* opdrachten die VLOT heeft doorgezet naar een chat: status volgen en resultaat melden */
+  const ops=d.opdrachten||[];
+  if(opsGezien===null){opsGezien={};ops.forEach(o=>opsGezien[o.id]=o.status)}
+  else ops.forEach(o=>{if(opsGezien[o.id]===o.status)return;opsGezien[o.id]=o.status;const kn=CONFIG.kanalen.find(k=>k.id===o.kanaal)?.label||o.kanaal;
+    if(o.status==='nieuw')log(d.doorsturen?'Opdracht klaargezet: '+kn:'Opdracht wacht: de assistent luistert niet');
+    else if(o.status==='doorgezet')log('Doorgezet naar '+kn);
+    else if(o.status==='klaar'){log(kn+' klaar: '+o.resultaat.slice(0,50));if(!speechSynthesis.speaking)say('Bericht van '+kn.toLowerCase()+', meneer. '+o.resultaat)}});
+}
+function api(u,m='GET',b){return fetch(u,{method:m,headers:{'Content-Type':'application/json'},body:b?JSON.stringify(b):undefined}).then(r=>r.json())}
+let lastUpd='';
+/* zolang er een opdracht loopt vaker kijken of hij klaar is */
+setInterval(()=>{if((LIVE?.opdrachten||[]).some(o=>o.status!=='klaar'&&Date.now()-Date.parse(o.aangemaakt)<6*3600e3))load()},10000);
+function load(){api('/api/state').then(d=>{render(d);if(d.bijgewerkt&&d.bijgewerkt!==lastUpd){if(lastUpd)log('Gegevens ververst');lastUpd=d.bijgewerkt}}).catch(()=>{})}
+/* ---- Spotify: nu aan het spelen + bediening ---- */
+let SPO={gekoppeld:false},spLastTrack='';
+function spLoad(){api('/api/spotify').then(s=>{SPO=s;
+  const T=document.getElementById('spTitel'),A=document.getElementById('spArt'),C=document.getElementById('spCover');
+  document.getElementById('spCtl').style.display=s.gekoppeld?'inline':'none';
+  if(!s.gekoppeld){T.textContent='SPOTIFY';A.textContent=s.reden==='geen-client-id'?'Client ID ontbreekt':'klik om te koppelen';C.style.display='none'}
+  else if(!s.titel){T.textContent='ER SPEELT NIETS';A.textContent='';C.style.display='none';document.getElementById('spBar').style.width='0%'}
+  else{T.textContent=s.titel;A.textContent=s.artiest||'';if(s.cover){C.src=s.cover;C.style.display='block'}
+    document.getElementById('spBar').style.width=(s.voortgang/s.duur*100)+'%';document.getElementById('spPP').innerHTML=s.speelt?'&#10074;&#10074;':'&#9654;';
+    if(s.titel!==spLastTrack){if(spLastTrack)log('Speelt: '+s.titel);spLastTrack=s.titel}}
+  const k=CONFIG.koppelingen.find(k=>k[0].startsWith('Spotify'));if(k){k[1]=s.gekoppeld&&analyser?'ok':s.gekoppeld?'let':'nee';renderKoppelingen()}
+}).catch(()=>{})}
+function spDo(a){if(a==='toggle')a=SPO.speelt?'pause':'play';return api('/api/spotify/'+a,'POST').then(r=>{if(!r.ok&&r.status===403)say('Dat staat Spotify alleen toe met Premium, vrees ik.');else if(!r.ok&&r.status===404)say('Ik zie geen actief Spotify-apparaat, meneer. Open Spotify eerst even.');setTimeout(spLoad,600)})}
+document.getElementById('sp').onclick=e=>{const a=e.target.closest('[data-a]')?.dataset.a;if(a){e.stopPropagation();spDo(a)}else if(!SPO.gekoppeld&&LIVE)location.href='/spotify/login';else if(SPO.gekoppeld&&!analyser)koppelAudio()};
+setInterval(spLoad,5000);
+document.getElementById('todoIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.value.trim()){api('/api/todo','POST',{tekst:e.target.value.trim(),kanaal:zoomed?.id||'algemeen'}).then(load);log('Taak toegevoegd');e.target.value=''}});
+
+/* ---- Kanaalpaneel: tabbladen met widget, KPI's en to-do's ---- */
+const cp=document.getElementById('chPanel');let cpK=null,cpO=null;
+cp.querySelector('.close').onclick=()=>{cp.classList.add('off');cpK=null};
+function kpiRows(kp){return kp.map(k=>{const v=k.waarde,e=k.eenheid||'',hd=k.doel!=null,p=v==null||!hd?0:k.lagerIsBeter?(v<=k.doel?1:Math.max(0,1-(v-k.doel)/5)):Math.min(1,v/k.doel);
+  return `<div class="row" style="padding:0;font-size:14px"><span>${esc(k.naam)} <span class="mono" style="opacity:.45">/ ${esc(k.periode)}${/auto/.test(k.bron)?' · auto':''}</span></span><span class="mono">${v==null?'–':e+v.toLocaleString('nl-NL')}${hd?' / '+e+k.doel:''}</span></div>${hd?`<div class="minibar" style="margin:2px 0 6px"><i style="width:${p*100}%${p<.5?';background:var(--warn)':''}"></i></div>`:'<div style="height:6px"></div>'}`}).join('')||'<div class="mono" style="opacity:.6">Geen KPI\'s bij dit tabblad</div>'}
+const dagNL=s=>new Date(s+'T12:00').toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'short'});
+function agRows(a){return a.map(x=>`<div class="row" style="font-size:14px"><span>${esc(x.titel)}</span><span class="mono">${dagNL(x.dag)} ${x.start}</span></div>`).join('')||'<div class="mono" style="opacity:.6">Niets gepland</div>'}
+const WIDGET={
+  socials:()=>{const s=LIVE?.socials;
+    if(!s)return `<div class="mono" style="opacity:.7;margin-bottom:8px">Facebook en Instagram zijn nog niet gekoppeld.</div><a class="btn" href="de instellingen">FACEBOOK / INSTAGRAM KOPPELEN</a>`;
+    if(s.fout)return `<div class="mono down" style="margin-bottom:8px">Fout bij ophalen: ${esc(s.fout)}</div><a class="btn" href="de instellingen">OPNIEUW KOPPELEN</a>`;
+    const I=s.ig||{},F=s.fb||{},iw=I.week||{},iv=I.vorige||{},fw=F.week||{},fv=F.vorige||{},nl=v=>v==null?'–':Number(v).toLocaleString('nl-NL');
+    const tile=(l,v,p0)=>{const p=v!=null&&p0?(v-p0)/p0*100:null;return `<div class="stile"><div class="mono sl">${l}</div><div class="sv">${nl(v)}</div><div class="mono ${p==null||p>=0?'up':'down'}" style="font-size:10px">${p==null?(p0===0&&v>0?'▲ nieuw':'&nbsp;'):(p>=0?'▲ ':'▼ ')+Math.abs(p).toFixed(0)+'%'}</div></div>`};
+    const md=I.media||[],mx=Math.max(1,...md.map(m=>m.weergaven||0));
+    return `<div class="mono" style="opacity:.55;margin-bottom:4px">Afgelopen 7 dagen · ▲▼ t.o.v. de week ervoor · bijgewerkt ${new Date(s.bijgewerkt).toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'})}</div>
+      <div class="sh"><span class="dot"></span>INSTAGRAM ${I.user?'@'+esc(I.user):''} · ${nl(I.volgers)} VOLGERS · ${nl(I.posts)} POSTS</div>
+      <div class="sgrid">${tile('WEERGAVEN',iw.views,iv.views)}${tile('BEREIK',iw.reach,iv.reach)}${tile('PROFIELBEZOEKEN',iw.profile_views,iv.profile_views)}${tile('INTERACTIES',iw.total_interactions,iv.total_interactions)}${tile('LIKES',iw.likes,iv.likes)}${tile('WEBSITEKLIKS',iw.website_clicks,iv.website_clicks)}</div>
+      <div class="sh"><span class="dot w"></span>FACEBOOK · ${esc(F.naam||'')} · ${nl(F.volgers)} VOLGERS</div>
+      <div class="sgrid">${tile('WEERGAVEN',fw.weergaven,fv.weergaven)}${tile('BEREIK',fw.bereik,fv.bereik)}${tile('PAGINABEZOEKEN',fw.bezoeken,fv.bezoeken)}${tile('INTERACTIES',fw.interacties,fv.interacties)}${tile('VIDEOWEERGAVEN',fw.videoweergaven,fv.videoweergaven)}${tile('POSTS IG DEZE WEEK',I.postsWeek,null)}</div>
+      <h3>PER DAG · LAATSTE 28 DAGEN</h3><canvas id="socC" width="446" height="120"></canvas>
+      <div class="mono" style="font-size:10px;opacity:.75"><span style="color:${C}">━ IG bereik</span> &nbsp; <span style="color:${WN}">━ FB weergaven</span> &nbsp; <span style="color:#e6fbff">━ FB paginabezoeken</span></div>
+      ${md.length?`<h3>LAATSTE INSTAGRAM-POSTS</h3>${md.map(m=>`<a class="prow" href="${esc(m.link)}" target="_blank" title="Open op Instagram">${m.thumb?`<img src="${esc(m.thumb)}" alt="">`:'<span class="noimg"></span>'}
+        <div class="pmid"><div class="mono" style="opacity:.6">${dagNL(m.dag)} · ${m.type==='VIDEO'?'REEL':m.type==='CAROUSEL_ALBUM'?'CAROUSEL':'FOTO'}</div><div class="ptx">${esc(m.tekst)||'&nbsp;'}</div><div class="pbar"><i style="width:${(m.weergaven||0)/mx*100}%"></i></div></div>
+        <div class="mono pnum"><b>${nl(m.weergaven)}</b> weerg.<br>${nl(m.bereik)} bereik<br>${m.likes} ♥ · ${m.reacties} reac.</div></a>`).join('')}`:''}`},  klanten:()=>{const k=LIVE?.klanten;if(!k)return '<div class="mono">Benaderlijst niet gevonden in de zakelijke OneDrive.</div>';if(k.fout)return '<div class="mono down">Excel niet leesbaar: '+esc(k.fout)+'</div>';
+    const tile=(l,v,w)=>`<div class="stile"><div class="mono sl">${l}</div><div class="sv"${w?' style="color:var(--warn)"':''}>${v}</div></div>`;
+    const rij=x=>`<div class="row" style="font-size:13px"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span class="dot ${x.status==='nabellen'?'w':''}"></span>${esc(x.naam)} <span class="mono" style="opacity:.5">${esc(x.branche.split(' /')[0])}</span></span><span class="mono" style="white-space:nowrap">${x.status==='nabellen'?esc(x.tel||'geen nr'):'vanaf '+dagNL(x.vanaf)}</span></div>`;
+    return `<div class="mono" style="opacity:.55;margin-bottom:6px">${esc(k.bestand)} · tabblad Opvolging · opvolgen = nabellen, 5 werkdagen na de mail</div>
+      <div class="sgrid">${tile('IN LIJST',k.totaal)}${tile('GEMAILD',k.gemaild)}${tile('NU NABELLEN',k.nabellen,k.nabellen>0)}${tile('GEBELD',k.gebeld)}${tile('ENQUÊTE INGEVULD',k.ingevuld)}${tile('AFGEMELD',k.afgemeld)}</div>
+      ${k.gesprekken.length?'<h3>GESPREK PLANNEN</h3>'+k.gesprekken.map(rij).join(''):''}
+      <h3>NU NABELLEN · ${k.nabellen}</h3><div style="max-height:190px;overflow:auto">${k.nuBellen.map(rij).join('')||'<div class="mono" style="opacity:.6">Niemand op dit moment</div>'}</div>
+      ${k.binnenkort.length?'<h3>BINNENKORT NABELLEN</h3>'+k.binnenkort.map(rij).join(''):''}
+      <div class="mono" style="opacity:.6;margin-top:6px">Nog geen eerste mail: ${k.eersteMail} bedrijven. Zeg tegen VLOT bijvoorbeeld "Cops gebeld, wil een gesprek" en de Excel wordt bijgewerkt.</div>`},
+  post:()=>{const p=LIVE?.post;if(!p)return '<div class="mono">Nog geen post gevonden.</div>';
+    return `<div class="mono" style="opacity:.7">${dagNL(p.dag)} · beste tijd: ${esc(p.tijd)}</div><div style="display:flex;gap:10px;margin-top:6px">${p.img?(p.video?`<video src="${p.img}?${p.dag}" muted loop autoplay playsinline style="width:150px;align-self:flex-start;border:1px solid #3fd0ff55"></video>`:`<img src="${p.img}?${p.dag}" style="width:150px;align-self:flex-start;border:1px solid #3fd0ff55">`):''}<div style="font-size:13px;white-space:pre-wrap;max-height:200px;overflow:auto">${esc(p.caption)}</div></div>`},
+  scenarios:()=>(LIVE?.make?.scenarios||[]).map(s=>`<div class="row" style="font-size:14px"><span><span class="dot ${LS[s.status]?.[0]??''}"></span>${esc(s.naam)}</span><span class="mono">${esc(s.label)}</span></div>`).join(''),
+  agenda:()=>{const td=new Date().toISOString().slice(0,10),a=(LIVE?.agenda||[]);const v=a.filter(x=>x.dag===td);return (v.length?'':'<div class="mono" style="opacity:.6;margin-bottom:4px">Vandaag niets gepland. Eerstvolgende:</div>')+agRows(v.length?v:a.filter(x=>x.dag>td).slice(0,3))},
+  week:()=>{const td=new Date().toISOString().slice(0,10),e=new Date(Date.now()+7*864e5).toISOString().slice(0,10);return agRows((LIVE?.agenda||[]).filter(x=>x.dag>=td&&x.dag<=e))},
+  mail:()=>{const m=LIVE?.mail;if(!m)return '';return `<div class="row"><span>Ongelezen</span><span class="k">${m.ongelezen}</span></div>`+(m.recent||[]).map(x=>`<div class="row" style="font-size:13px"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:300px">${esc(x.onderwerp)}</span><span class="mono" style="opacity:.6">${esc(x.van)}</span></div>`).join('')}
+};
+function socDraw(){const el=document.getElementById('socC'),s=LIVE?.socials;if(!el||!s)return;const g=el.getContext('2d'),W=446,H=120;g.clearRect(0,0,W,H);
+  const r=(x,k)=>(x?.reeks?.[k]||[]).map(p=>p.v),A=r(s.ig,'bereik'),B=r(s.fb,'weergaven'),D=r(s.fb,'bezoeken'),mx=Math.max(4,...A,...B,...D)*1.1;
+  g.strokeStyle='#3fd0ff1f';g.fillStyle='#cfefff88';g.font="10px 'Share Tech Mono',monospace";
+  for(let i=0;i<=4;i++){const y=4+i*(H-20)/4;g.beginPath();g.moveTo(26,y);g.lineTo(W,y);g.stroke();g.fillText(Math.round(mx*(1-i/4)),0,y+3)}
+  g.save();g.translate(26,0);[[A,C],[B,WN],[D,'#e6fbff']].forEach(([a,c])=>{if(a.length>1)line(g,a,c,0,mx,W-26,H-16)});g.restore();
+  const ds=(s.ig?.reeks?.bereik||s.fb?.reeks?.weergaven||[]);if(ds.length){g.fillStyle='#cfefff88';g.fillText(dagNL(ds[0].dag),26,H-2);const l=dagNL(ds.at(-1).dag);g.fillText(l,W-g.measureText(l).width,H-2)}}/* Wat VLOT hardop vertelt bij een 'vertel'-tabblad (uit de live data, zonder Claude: direct) */
+const vandaagISO=()=>new Date().toLocaleDateString('sv-SE');
+const schoon=s=>String(s||'').replace(/\*\*/g,'').replace(/["“”]/g,'').trim();
+const zoekScen=n=>(LIVE?.make?.scenarios||[]).find(s=>s.naam.toLowerCase().includes(n));
+const VERTEL={
+  post:()=>{const p=LIVE?.post;if(!p)return 'Er is nog geen dagelijkse post gemaakt, meneer.';
+    const vd=p.dag===vandaagISO(),online=(LIVE?.socials?.ig?.media||[]).some(m=>m.dag===p.dag);
+    const zin=schoon(p.idee).split(/(?<=[.!?])\s/)[0].replace(/\.+$/,'');
+    return `De post van ${vd?'vandaag':dagNL(p.dag)}${p.titel?' is een '+schoon(p.titel):''}. ${zin}. `+(online?'Hij staat al online op Instagram.':`Hij staat nog niet online${p.tijd?'. Beste moment: '+schoon(p.tijd).split('. ')[0].replace(/\.+$/,'').replace(/–/g,' tot '):''}.`)},
+  vandaag:()=>{const td=vandaagISO(),ag=(LIVE?.agenda||[]).filter(a=>a.dag===td),kl=LIVE?.klanten;
+    const todo=(LIVE?.todos||[]).filter(x=>!x.klaar).slice(0,3).map(x=>x.tekst);
+    return (ag.length?'Vandaag op de agenda: '+ag.map(a=>a.start+' '+a.titel).join(', en ')+'. ':'Uw agenda is vandaag leeg, meneer. ')
+      +(kl?.nabellen?`Er staan ${kl.nabellen} bedrijven klaar om na te bellen. `:'')+(todo.length?'Verder op de lijst: '+todo.join(', ')+'.':'')},
+  scenario:o=>{const s=zoekScen(o.scenario);if(!s)return `Ik vind het scenario ${o.naam.toLowerCase()} niet in Make, meneer.`;
+    const aan=s.status==='ok'||s.label==='ACTIEF'?'staat aan':'staat uit';
+    if(s.runsWeek==null&&s.runsMaand==null)return `${s.naam} ${aan}. Het aantal keer dat hij is gebruikt komt bij de volgende verversing binnen.`;
+    return `${s.naam} ${aan} en is deze week ${s.runsWeek??0} keer gebruikt, deze maand ${s.runsMaand??0} keer${s.laatsteRun?', voor het laatst op '+dagNL(s.laatsteRun.slice(0,10)):''}${s.fouten7d?'. Let op: '+s.fouten7d+' fout'+(s.fouten7d>1?'en':'')+' deze week':''}.`},
+  fouten:()=>{const fl=LIVE?.make?.fouten||[],kp=(LIVE?.kpis||[]).find(k=>k.naam==='fouten in de automatiseringen')?.waarde;
+    if(!fl.length&&!kp)return 'Geen fouten in de automatiseringen in de afgelopen week, meneer. Er hoeft niets gecontroleerd te worden.';
+    if(!fl.length)return `Er ${kp===1?'was één fout':'waren '+kp+' fouten'} in de afgelopen week. De details komen bij de volgende verversing binnen; ik kan Make Creations alvast laten kijken.`;
+    return `${fl.length===1?'Eén fout':fl.length+' fouten'} in de afgelopen week. `+fl.slice(0,3).map(x=>`${x.scenario}: ${x.melding}.${x.advies?' '+x.advies+'.':''}`).join(' ')+' Zal ik Make Creations het laten controleren? Klik dan op laat controleren.'},
+  opvolgen:()=>{const z=LIVE?.mail?.zonderAntwoord;if(!z)return 'Die lijst komt bij de volgende verversing binnen, meneer.';
+    if(!z.length)return 'Er wachten geen mails op een antwoord, meneer.';
+    return `${z.length===1?'Eén mail wacht':z.length+' mails wachten'} op uw antwoord. `+z.slice(0,3).map(x=>`Van ${x.van} over ${x.onderwerp}${x.dagen?', '+x.dagen+' dagen':''}`).join('. ')+'.'},
+  mailupdate:()=>{const m=LIVE?.mail;if(!m)return 'Ik heb nog geen mailgegevens, meneer.';
+    if(m.update?.samenvatting)return m.update.samenvatting;
+    return `U heeft ${m.ongelezen} ongelezen mail${m.ongelezen===1?'':'s'}. De nieuwste: `+(m.recent||[]).slice(0,3).map(x=>x.van+' over '+x.onderwerp).join('. ')+'.'}
+};
+function tabKlik(k,o){openPanel(k,o);
+  if(o.link){window.open(o.link,'_blank');log('Geopend: '+o.naam)}
+  if(o.vertel)say(VERTEL[o.vertel](o));
+  if(o.invoer)setTimeout(()=>document.getElementById('cpAfspraak')?.focus(),300)}
+function invoerKlaar(k,o){const ta=document.getElementById('cpAfspraak'),go=()=>{const v=ta.value.trim();if(!v)return;
+  api('/api/opdracht','POST',{kanaal:'algemeen',tekst:o.invoer.opdracht+v}).then(()=>{ta.value='';ta.blur();say('Doorgezet naar Algemeen, meneer. Die chat vraagt u eerst om akkoord voordat de afspraak erin komt.');load()})};
+  cp.querySelector('[data-b=invoer]').onclick=go;ta.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();go()}}}
+function foutenKlaar(){const b=cp.querySelector('[data-b=controleer]');if(!b)return;b.onclick=()=>{const fl=LIVE?.make?.fouten||[];
+  api('/api/opdracht','POST',{kanaal:'make',tekst:'Controleer de fouten in de automatiseringen van de afgelopen 7 dagen'+(fl.length?': '+fl.map(x=>x.scenario+' ('+x.melding+')').join('; '):'')+'. Zoek de oorzaak, los op wat veilig kan (vraag de gebruiker om akkoord voor wijzigingen of het aan- of uitzetten van scenario\'s) en meld kort wat er aan de hand was.'}).then(()=>{say('Make Creations gaat het controleren, meneer.');load()})}}
+Object.assign(WIDGET,{
+  scenario:o=>{const s=zoekScen(o.scenario);if(!s)return '<div class="mono">Scenario niet gevonden in Make.</div>';
+    const tile=(l,v)=>`<div class="stile"><div class="mono sl">${l}</div><div class="sv" style="font-size:16px">${v??'–'}</div></div>`;
+    return `<div class="sgrid">${tile('STATUS',esc(s.label))}${tile('RUNS DEZE WEEK',s.runsWeek)}${tile('RUNS DEZE MAAND',s.runsMaand)}${tile('LAATST GEBRUIKT',s.laatsteRun?dagNL(s.laatsteRun.slice(0,10)):null)}${tile('FOUTEN 7 DAGEN',s.fouten7d)}${tile('SCENARIO',esc(s.naam))}</div>`},
+  fouten:()=>{const fl=LIVE?.make?.fouten||[];
+    return (fl.length?fl.map(x=>`<div style="padding:5px 0;border-bottom:1px solid #3fd0ff1a;font-size:13px"><span class="dot b"></span><b>${esc(x.scenario)}</b> <span class="mono" style="opacity:.6">${esc(x.wanneer||'')}</span><div class="mono" style="opacity:.8">${esc(x.melding||'')}</div>${x.advies?'<div style="color:var(--warn);font-size:12px">'+esc(x.advies)+'</div>':''}</div>`).join(''):'<div class="mono" style="opacity:.7">Geen fouten bekend uit de laatste verversing.</div>')
+      +'<div class="btns"><span class="btn" data-b="controleer">&#9881; LAAT MAKE CONTROLEREN</span></div>'},
+  opvolgen:()=>{const z=LIVE?.mail?.zonderAntwoord;if(!z)return '<div class="mono" style="opacity:.7">Komt binnen bij de volgende verversing (7:30 / 12:30).</div>';
+    return z.map(x=>`<div class="row" style="font-size:13px"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span class="dot w"></span>${esc(x.van)} · ${esc(x.onderwerp)}</span><span class="mono">${x.dagen??'?'} d</span></div>`).join('')||'<div class="mono" style="opacity:.7">Niets dat op antwoord wacht.</div>'},
+  mailupdate:()=>{const m=LIVE?.mail;if(!m)return '';const u=m.update;
+    return `${u?.samenvatting?'<p style="font-size:15px;line-height:1.45;margin:0 0 8px">'+esc(u.samenvatting)+'</p>':''}`+(u?.binnen||m.recent||[]).map(x=>`<div class="row" style="font-size:13px"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.van)} · ${esc(x.onderwerp)}</span><span class="mono" style="opacity:.6">${esc(x.soort||x.wanneer||'')}</span></div>`).join('')},
+  invoer:o=>`<textarea id="cpAfspraak" rows="3" placeholder="${esc(o.invoer.tekst)}" style="width:100%;box-sizing:border-box;background:#03203a;border:1px solid #3fd0ff66;color:#e6fbff;font:14px 'Share Tech Mono';padding:8px;resize:none"></textarea>
+    <div class="btns"><span class="btn" data-b="invoer">&#10148; IN DE AGENDA ZETTEN</span></div><div class="mono" style="opacity:.55;margin-top:6px">Gaat naar de chat Algemeen; die vraagt eerst om akkoord.</div>`
+});
+const WTITEL={scenario:'GEBRUIK',fouten:'MAKE-FOUTEN · 7 DAGEN',opvolgen:'WACHT OP ANTWOORD',mailupdate:'BINNENGEKOMEN MAIL',invoer:'NIEUWE AFSPRAAK',klanten:'BENADERLIJST · OPVOLGING',socials:'FACEBOOK / INSTAGRAM',post:'POST VAN VANDAAG',scenarios:"SCENARIO'S",agenda:'VANDAAG',week:'KOMENDE 7 DAGEN',mail:'INBOX'};
+function openPanel(k,o){cpK=k;cpO=o||null;renderPanel();cp.classList.remove('off');if(o)log('Tabblad: '+k.label+' / '+o.naam)}
+function renderPanel(){
+  const k=cpK,o=cpO||{},d=LIVE||{};if(!k)return;
+  cp.dataset.t=k.label+' · '+(cpO?cpO.naam.toUpperCase():'OVERZICHT');
+  const alleK=d.kpis||[],alleT=(d.todos||[]).filter(t=>!t.klaar),re=o.zoek?new RegExp(o.zoek,'i'):null;
+  const kp=o.kpis==='alle'?alleK:alleK.filter(x=>x.kanaal===k.id&&(!o.kpis||o.kpis.includes(x.naam)));
+  const td=o.todos==='geen'?null:o.todos==='alle'?alleT:alleT.filter(t=>t.kanaal===k.id&&(!re||re.test(t.tekst)));
+  const w=cpO?o.widget:k.widget;
+  document.getElementById('cpBody').innerHTML=`<div class="tabs"><span class="tab ${cpO?'':'on'}" data-i="-1">OVERZICHT</span>${k.opties.map((x,i)=>`<span class="tab ${cpO===x?'on':''}" data-i="${i}">${esc(x.naam.toUpperCase())}</span>`).join('')}</div>
+    ${cpO&&(o.link||o.vertel)?`<div class="btns" style="margin-top:10px">${o.link?`<a class="btn" href="${esc(o.link)}" target="_blank">&#8599; OPEN ${esc(o.naam.toUpperCase())}</a>`:''}${o.vertel?'<span class="btn" data-b="vertel">&#9673; VERTEL</span>':''}</div>`:''}
+    ${w&&WIDGET[w]?`<h3>${WTITEL[w]||''}</h3>${WIDGET[w](o)}`:''}
+    ${o.kpis&&!o.kpis.length?'':`<h3>KPI'S</h3>${kpiRows(kp)}`}
+    ${td?`<h3>TO-DO · ${td.length} OPEN</h3>${td.map(t=>`<div class="row" data-id="${t.id}" style="cursor:pointer;font-size:14px" title="Klik om af te vinken"><span><span class="dot ${t.bron==='voorstel'?'w':''}"></span>${esc(t.tekst)}</span><span class="mono">${o.todos==='alle'?esc(t.kanaal).slice(0,4).toUpperCase():'&#10003;'}</span></div>`).join('')||'<div class="mono" style="opacity:.6">Niets open</div>'}
+      <input id="cpIn" placeholder="+ taak toevoegen aan ${esc(k.label.toLowerCase())} (Enter)">`:''}
+    <div class="btns"><span class="btn" data-b="vraag">&#9673; VRAAG VLOT</span><span class="btn" data-b="chat">&#8599; OPEN CHAT</span></div>`;
+  if(w==='socials')socDraw();
+  cp.querySelectorAll('.tab').forEach(e=>e.onclick=()=>openPanel(k,e.dataset.i<0?null:k.opties[e.dataset.i]));
+  cp.querySelectorAll('#cpBody [data-id]').forEach(r=>r.onclick=()=>api('/api/todo/'+r.dataset.id,'PATCH').then(()=>{log('Taak afgevinkt');load()}));
+  const inp=document.getElementById('cpIn');if(inp)inp.onkeydown=e=>{if(e.key==='Enter'&&inp.value.trim()){api('/api/todo','POST',{tekst:inp.value.trim(),kanaal:k.id}).then(()=>{inp.blur();load()});log('Taak toegevoegd');inp.value=''}};
+  const vb=cp.querySelector('[data-b=vertel]');if(vb)vb.onclick=()=>say(VERTEL[o.vertel](o));
+  if(w==='invoer')invoerKlaar(k,o);if(w==='fouten')foutenKlaar();
+  cp.querySelector('[data-b=vraag]').onclick=()=>answer(o.vraag||`Geef me een korte update over ${k.label.toLowerCase()}.`);
+  cp.querySelector('[data-b=chat]').onclick=()=>{say('In de demo is er geen chat. In jouw eigen dashboard opent deze knop de bijbehorende omgeving.')};
+}
+
+/* ---- Kleine grafieken ---- */const C='#3fd0ff',WN='#ffb347';
+function ctx(id){return document.getElementById(id).getContext('2d')}
+let ig=Array.from({length:20},(_,i)=>800+i*25+Math.random()*120),fb=Array.from({length:20},(_,i)=>900-i*8+Math.random()*90);
+function line(g,arr,col,mn,mx,w,h){g.strokeStyle=col;g.lineWidth=1.6;g.beginPath();arr.forEach((v,i)=>{const x=i*w/(arr.length-1),y=h-4-(v-mn)/(mx-mn)*(h-8);i?g.lineTo(x,y):g.moveTo(x,y)});g.stroke();
+  g.lineTo(w,h);g.lineTo(0,h);g.closePath();g.fillStyle=col+'18';g.fill()}
+let SOC=null;
+function mkt(){const g=ctx('mktc');g.clearRect(0,0,266,70);
+  let n1=ig.at(-1),n2=fb.at(-1),p1,p2;const pc=a=>a[0]?((a[a.length-1]-a[0])/a[0]*100):0,dl=(a,b)=>b?(a-b)/b*100:null;
+  if(SOC){const r=(x,k)=>(x?.reeks?.[k]||[]).map(p=>p.v);ig=r(SOC.ig,'bereik');fb=r(SOC.fb,'weergaven');if(ig.length<2)ig=[0,0];if(fb.length<2)fb=[0,0];
+    n1=SOC.ig?.week?.views??0;n2=SOC.fb?.week?.weergaven??0;p1=dl(n1,SOC.ig?.vorige?.views);p2=dl(n2,SOC.fb?.vorige?.weergaven)}
+  else{p1=pc(ig);p2=pc(fb)}
+  const all=[...ig,...fb],mn=SOC?0:Math.min(...all)-50,mx=Math.max(...all,SOC?5:0)+(SOC?2:50);
+  g.strokeStyle='#3fd0ff22';for(let y=0;y<70;y+=14){g.beginPath();g.moveTo(0,y);g.lineTo(266,y);g.stroke()}
+  line(g,ig,C,mn,mx,266,70);line(g,fb,WN,mn,mx,266,70);
+  document.getElementById('igv').textContent=Math.round(n1).toLocaleString('nl-NL');
+  document.getElementById('fbv').textContent=Math.round(n2).toLocaleString('nl-NL');
+  const zet=(id,p)=>{const e=document.getElementById(id);e.textContent=p==null?'nieuw':(p>=0?'▲ ':'▼ ')+Math.abs(p).toFixed(0)+'%';e.className=(p==null||p>=0?'up':'down')+' mono';e.title='t.o.v. vorige week'};
+  zet('igp',p1);zet('fbp',p2);}setInterval(()=>{if(SOC)return;ig.shift();ig.push(ig.at(-1)+Math.random()*80-25);fb.shift();fb.push(fb.at(-1)+Math.random()*60-38);mkt()},2500);mkt();
+let ops=Array.from({length:24},()=>Math.random());
+function opsDraw(){const g=ctx('opsc');g.clearRect(0,0,266,40);ops.forEach((v,i)=>{g.fillStyle=i===ops.length-1?WN:C;g.globalAlpha=.4+v*.6;g.fillRect(i*11,40-v*38,8,v*38)});g.globalAlpha=1}
+setInterval(()=>{ops.shift();ops.push(Math.random());opsDraw()},1800);opsDraw();
+AG=[[10,10.75,'Belafspraak klant'],[13.5,15,'Enquête nabellen'],[16,16.5,'Post controleren']];
+function agDraw(){const g=ctx('agc');g.clearRect(0,0,266,122);const h0=8,h1=21,X=h=>(h-h0)/(h1-h0)*262+2;
+  g.font='11px "Share Tech Mono", monospace';g.fillStyle='#cfefff99';
+  for(let h=h0;h<=h1;h+=2){g.fillText(h,X(h)-6,118);g.fillStyle='#3fd0ff22';g.fillRect(X(h),0,1,104);g.fillStyle='#cfefff99'}
+  AG.forEach(([a,b,t],i)=>{const y=8+i*32;g.fillStyle='#3fd0ff33';g.fillRect(X(a),y,X(b)-X(a),22);g.strokeStyle=C;g.strokeRect(X(a),y,X(b)-X(a),22);g.fillStyle='#e6fbff';g.font='500 13px Rajdhani, sans-serif';g.fillText(t.slice(0,34),X(a)<130?X(a)+4:4,y+15)});
+  const n=new Date(),hh=n.getHours()+n.getMinutes()/60;if(hh>=h0&&hh<=h1){g.fillStyle=WN;g.fillRect(X(hh),0,2,104)}}
+agDraw();setInterval(agDraw,30000);
+let net=Array.from({length:60},()=>.5);
+function netDraw(){const g=ctx('netc');g.clearRect(0,0,266,84);net.shift();net.push(Math.max(.05,Math.min(.95,net.at(-1)+Math.random()*.3-.15)));
+  g.strokeStyle=C;g.beginPath();net.forEach((v,i)=>{const x=i*266/59,y=84-v*80;i?g.lineTo(x,y):g.moveTo(x,y)});g.stroke();
+  g.strokeStyle=WN;g.globalAlpha=.6;g.beginPath();net.forEach((v,i)=>{const x=i*266/59,y=84-(1-v)*50-10;i?g.lineTo(x,y):g.moveTo(x,y)});g.stroke();g.globalAlpha=1}
+setInterval(netDraw,200);
+let ang=0;
+function radarGauge(){
+  let g=ctx('radar');g.clearRect(0,0,120,120);g.strokeStyle='#3fd0ff55';
+  [20,38,56].forEach(r=>{g.beginPath();g.arc(60,60,r,0,7);g.stroke()});g.beginPath();g.moveTo(4,60);g.lineTo(116,60);g.moveTo(60,4);g.lineTo(60,116);g.stroke();
+  g.fillStyle='#3fd0ff44';g.beginPath();g.moveTo(60,60);g.arc(60,60,56,ang,ang+.6);g.closePath();g.fill();
+  g.fillStyle=C;[[.3,30],[2.1,44],[4,24]].forEach(([a,r])=>{const d=((ang-a)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);g.globalAlpha=Math.max(0,1-d/4);g.beginPath();g.arc(60+Math.cos(a)*r,60+Math.sin(a)*r,3,0,7);g.fill()});g.globalAlpha=1;
+  g=ctx('gauge');g.clearRect(0,0,120,120);const v=Math.max(0,Math.min(1,kpiScore+Math.sin(ang*.7)*.01));
+  g.lineWidth=8;g.strokeStyle='#0e3a5c';g.beginPath();g.arc(60,60,48,Math.PI*.75,Math.PI*2.25);g.stroke();
+  g.strokeStyle=C;g.beginPath();g.arc(60,60,48,Math.PI*.75,Math.PI*(.75+1.5*v));g.stroke();g.lineWidth=1;
+  g.strokeStyle='#3fd0ff66';g.beginPath();g.arc(60,60,36,ang,ang+4);g.stroke();
+  g.fillStyle='#e6fbff';g.font='18px Orbitron';g.textAlign='center';g.fillText(Math.round(v*100)+'%',60,66);g.font='9px Orbitron';g.fillText('DOELEN',60,82);g.textAlign='left';
+  ang+=.03;requestAnimationFrame(radarGauge)}
+radarGauge();
+
+/* ---- Pulse van kern ---- */
+/* rustig ademende ring: rust = langzaam (5 s), luisteren/praten = iets ruimer, zonder schokken */
+const pulseEl=document.getElementById('pulse');let pAmp=2.5,pSpd=1.25,pPh=0,pT=performance.now();
+(function pl(now){const dt=Math.min(.05,(now-pT)/1000);pT=now;
+  const doelA=core.className==='listening'?5:core.className==='thinking'?4:2.5,doelS=core.className?2:1.25;
+  pAmp+=(doelA-pAmp)*dt*1.5;pSpd+=(doelS-pSpd)*dt*1.5;pPh+=dt*pSpd;
+  const s=(1-Math.cos(pPh))/2;pulseEl.setAttribute('r',(68+s*pAmp).toFixed(2));pulseEl.setAttribute('fill-opacity',(.04+s*.05).toFixed(3));
+  requestAnimationFrame(pl)})(pT);
+
+/* ---- Equalizer (stippen) – reageert op systeemgeluid / Spotify ---- */
+const eq=document.getElementById('eq').getContext('2d'),COLS=170,SP=1600/COLS;let analyser=null,fbuf=null,lvl=new Array(COLS).fill(0),t0=0;
+async function koppelAudio(){
+  try{const s=await navigator.mediaDevices.getDisplayMedia({video:true,audio:true});
+    if(!s.getAudioTracks().length){say('Vink bij het delen systeemaudio delen aan, meneer, dan beweeg ik mee op uw muziek.');s.getTracks().forEach(t=>t.stop());return}
+    s.getVideoTracks().forEach(t=>t.stop());
+    const ac=new AudioContext(),src=ac.createMediaStreamSource(s);analyser=ac.createAnalyser();analyser.fftSize=512;analyser.smoothingTimeConstant=.75;src.connect(analyser);fbuf=new Uint8Array(analyser.frequencyBinCount);
+    document.getElementById('eqLabel').textContent='AUDIO · LIVE';
+    CONFIG.koppelingen.find(k=>k[0].startsWith('Spotify'))[1]='ok';document.getElementById('links').innerHTML=CONFIG.koppelingen.map(([n,s])=>`<div class="row"><span><span class="dot ${LS[s][0]}"></span>${n}</span><span class="mono ${s==='ok'?'up':'down'}">${LS[s][1]}</span></div>`).join('');
+    log('Audio gekoppeld');
+  }catch(e){log('Audio koppelen geannuleerd')}
+}
+
+let beat=0,bassAvg=0,lastBeat=0;const TT=document.getElementById('spTitel');
+(function eqDraw(){
+  t0+=.02;eq.clearRect(0,0,1600,200);
+  if(analyser){analyser.getByteFrequencyData(fbuf);
+    /* beat: plotselinge piek in de bas (laagste frequenties) t.o.v. het lopende gemiddelde */
+    let b=0;for(let k=0;k<6;k++)b+=fbuf[k];b/=6*255;bassAvg+=(b-bassAvg)*.05;
+    const nu=performance.now();if(b>.3&&b>bassAvg*1.25&&nu-lastBeat>260){beat=1;lastBeat=nu}}
+  beat*=.9;TT.style.textShadow=`0 0 ${4+beat*18}px rgba(63,208,255,${.4+beat*.6})`;
+  const base=110-beat*6;
+  for(let i=0;i<COLS;i++){
+    const m=Math.abs(i-COLS/2)/(COLS/2);let target;
+    if(analyser){const bin=Math.floor(Math.pow(m,1.6)*fbuf.length*.7);target=fbuf[bin]/255}
+    else target=.12+.1*Math.sin(i*.15+t0*2)*Math.sin(i*.04-t0)+.06*Math.sin(i*.6+t0*3);
+    lvl[i]+=(Math.max(0,target)-lvl[i])*.3;
+    const rows=Math.min(15,Math.round(lvl[i]*12*(1+beat*.35))),x=i*SP+SP/2;
+    for(let r=0;r<rows;r++){const y=base-r*4.6;eq.globalAlpha=.25+.75*(r/12);eq.fillStyle=r>rows-3?'#e6fbff':C;eq.beginPath();eq.arc(x,y,1.9,0,7);eq.fill()}
+    for(let r=1;r<rows*.6;r++){const y=base+r*4.6;eq.globalAlpha=.3*(1-r/(rows*.6));eq.fillStyle=C;eq.beginPath();eq.arc(x,y,1.9,0,7);eq.fill()}
+  }
+  eq.globalAlpha=1;requestAnimationFrame(eqDraw)})();
+
+/* ---- Achtergrond: raster, circuitbanen met pulsen, deeltjes, eigen afbeeldingen ---- */
+const cv=document.getElementById('bg'),g=cv.getContext('2d');let pts=[],tracks=[],pulses=[],imgs=[],imgI=0,imgA=0;
+CONFIG.achtergrond.forEach(f=>{const im=new Image();im.src='achtergrond/'+f;imgs.push(im)});
+function rs(){cv.width=innerWidth;cv.height=innerHeight;
+  pts=Array.from({length:110},()=>({x:Math.random()*cv.width,y:Math.random()*cv.height,vx:(Math.random()-.5)*.12,vy:(Math.random()-.5)*.12}));
+  tracks=Array.from({length:45},()=>{let x=Math.round(Math.random()*cv.width/20)*20,y=Math.round(Math.random()*cv.height/20)*20;const p=[[x,y]];
+    for(let s=0;s<4+Math.random()*4;s++){const l=(2+Math.random()*8)*20;Math.random()<.5?x+=Math.random()<.5?l:-l:y+=Math.random()<.5?l:-l;p.push([x,y])}return p});
+  pulses=tracks.map((t,i)=>({t:i,pos:Math.random()}))}
+rs();addEventListener('resize',rs);let sc=0,wt=0;
+function along(p,f){let L=0;const seg=[];for(let i=1;i<p.length;i++){const d=Math.hypot(p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]);seg.push(d);L+=d}
+  let d=f*L;for(let i=0;i<seg.length;i++){if(d<=seg[i]){const k=d/seg[i];return[p[i][0]+(p[i+1][0]-p[i][0])*k,p[i][1]+(p[i+1][1]-p[i][1])*k]}d-=seg[i]}return p.at(-1)}
+(function bg(){const W=cv.width,H=cv.height;g.fillStyle='#020b1a';g.fillRect(0,0,W,H);
+  if(imgs.length&&imgs[imgI].complete){imgA+=.002;const im=imgs[imgI],s=Math.max(W/im.width,H/im.height);g.globalAlpha=.22*Math.sin(Math.min(imgA,1)*Math.PI);
+    g.drawImage(im,(W-im.width*s)/2,(H-im.height*s)/2,im.width*s,im.height*s);g.globalAlpha=1;if(imgA>=1){imgA=0;imgI=(imgI+1)%imgs.length}}
+  wt+=.0035;const GX=150,GY=80;
+  for(let j=0;j<GY;j++)for(let i=0;i<GX;i++){const u=i/(GX-1),v=j/(GY-1);
+    const z=Math.sin(u*5+wt*2+Math.sin(v*3+wt))*.6+Math.sin(v*7-wt*1.5+u*2)*.35+Math.sin((u+v)*11+wt*3)*.12;
+    const s=1/(1.25-z*.35),x=W/2+(u-.5)*W*1.15*s,y=H/2+(v-.5)*H*1.1*s+z*25;
+    const a=Math.max(0,Math.min(1,(z+1)/2));g.fillStyle=`rgba(${120+a*120|0},${210+a*45|0},255,${.04+a*.22})`;g.fillRect(x,y,1.3+a,1.3+a)}
+  g.strokeStyle='rgba(63,208,255,.05)';g.lineWidth=1;
+  for(let x=0;x<W;x+=40){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke()}
+  for(let y=0;y<H;y+=40){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke()}
+  g.strokeStyle='rgba(63,208,255,.14)';tracks.forEach(p=>{g.beginPath();p.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.stroke();
+    g.fillStyle='rgba(63,208,255,.35)';g.beginPath();g.arc(p.at(-1)[0],p.at(-1)[1],2.5,0,7);g.fill()});
+  pulses.forEach(q=>{q.pos+=.0012;if(q.pos>1)q.pos=0;const [x,y]=along(tracks[q.t],q.pos);g.fillStyle='rgba(160,235,255,.9)';g.beginPath();g.arc(x,y,2,0,7);g.fill()});
+  sc=(sc+1.5)%H;g.fillStyle='rgba(63,208,255,.035)';g.fillRect(0,sc,W,70);
+  pts.forEach(p=>{p.x=(p.x+p.vx+W)%W;p.y=(p.y+p.vy+H)%H;g.fillStyle='rgba(63,208,255,.6)';g.fillRect(p.x,p.y,1.6,1.6)});
+  for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const a=pts[i],b=pts[j],d=Math.hypot(a.x-b.x,a.y-b.y);
+    if(d<90){g.strokeStyle=`rgba(63,208,255,${.12*(1-d/90)})`;g.beginPath();g.moveTo(a.x,a.y);g.lineTo(b.x,b.y);g.stroke()}}
+  requestAnimationFrame(bg)})();
+
+zoomOut();
+load();setInterval(load,60000);spLoad();
+</script>
+<script>setTimeout(()=>{const fl=document.getElementById('feedList');if(fl)fl.innerHTML=['07:30 Gegevens ververst','07:12 Nieuwe aanvraag via WhatsApp','06:58 Afspraakherinneringen verstuurd (3)','Gisteren 19:40 Bonnetje opgeslagen','Gisteren 17:05 Offerte Bakker geaccepteerd','Gisteren 15:20 Conceptofferte klaargezet'].map(t=>'<div>'+t+'</div>').join('')},2600);</script>
+</body>
+</html>
