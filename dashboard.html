@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; media-src 'self'; connect-src https://hook.eu1.make.com https://cloudflareinsights.com; form-action 'none'; base-uri 'self'; object-src 'none'; frame-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#0A2E4D">
+<title>Vaktijd Dashboard: al je aanvragen en afspraken op één plek | Vaktijd</title>
+<meta name="description" content="Aanvragen via WhatsApp, mail, je website en Facebook, plus je agenda: het Vaktijd Dashboard zet alles op één plek. Op maat gemaakt voor vakbedrijven en zzp'ers.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Vaktijd Dashboard: al je aanvragen en afspraken op één plek">
+<meta property="og:description" content="Aanvragen via WhatsApp, mail, je website en Facebook, plus je agenda: het Vaktijd Dashboard zet alles op één plek. Op maat gemaakt voor vakbedrijven en zzp'ers.">
+<link rel="canonical" href="https://vaktijd.nl/dashboard.html">
+<meta property="og:url" content="https://vaktijd.nl/dashboard.html">
+<meta property="og:site_name" content="Vaktijd">
+<meta property="og:locale" content="nl_NL">
+<meta property="og:image" content="https://vaktijd.nl/assets/vaktijd-share.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 48'%3E%3Cpath d='M24.8 19.2A14 14 0 0 1 48.7 15' fill='none' stroke='%230F5FA8' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M24.8 28.8A14 14 0 1 0 51.2 19.2' fill='none' stroke='%2353B848' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M31 24l5.5 5L46 18' fill='none' stroke='%230A2E4D' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="nav solid" id="nav">
+  <div class="wrap nav-inner">
+    <a href="./" class="brand" aria-label="Vaktijd, naar de homepage">
+      <svg viewBox="0 0 64 48" aria-hidden="true">
+        <path d="M6 18h17" fill="none" stroke-width="4" stroke-linecap="round" stroke="#0F5FA8"/>
+        <path d="M2 24h16" fill="none" stroke-width="4" stroke-linecap="round" stroke="#4A8FD0"/>
+        <path d="M6 30h17" fill="none" stroke-width="4" stroke-linecap="round" stroke="#53B848"/>
+        <path d="M24.8 19.2A14 14 0 0 1 48.7 15" fill="none" stroke="#0F5FA8" stroke-width="4.5" stroke-linecap="round"/>
+        <path d="M24.8 28.8A14 14 0 1 0 51.2 19.2" fill="none" stroke="#53B848" stroke-width="4.5" stroke-linecap="round"/>
+        <path d="M47 19.5l7.5-2.5-1 8z" fill="#53B848"/>
+        <path class="check-mark" d="M31 24l5.5 5L46 18" fill="none" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="wordmark">Vak<span>tijd</span></span>
+    </a>
+    <button class="menu-toggle" id="menuToggle" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="Menu openen"><span></span><span></span></button>
+    <nav class="nav-links" id="navLinks" aria-label="Hoofdmenu">
+      <a href="automatiseringen.html">Automatiseringen</a>
+      <a href="dashboard.html" aria-current="page">Dashboard</a>
+      <a href="werkwijze.html">Werkwijze</a>
+      <a href="over-ons.html">Over ons</a>
+      <a href="./#contact" class="btn btn-green">Kennismaken</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top" class="subpage">
+
+<section class="page-head page-head-plain">
+  <div class="wrap dash-head">
+    <div>
+      <span class="pill pill-dark">Nieuw</span>
+      <h1>Vaktijd Dashboard</h1>
+      <p class="lead">Al je aanvragen en afspraken op één plek. Of een klant nu appt, mailt, je website invult of je via Facebook een bericht stuurt: je ziet het in één oogopslag, met je agenda ernaast.</p>
+      <a href="./#contact" class="btn btn-green">Vraag een demo aan</a>
+    </div>
+    <div class="video-tall">
+      <video controls preload="none" playsinline poster="assets/vaktijd-dashboard-poster.jpg">
+        <source src="assets/vaktijd-dashboard.mp4" type="video/mp4">
+        Je browser kan deze video niet afspelen.
+      </video>
+    </div>
+  </div>
+</section>
+
+<section id="herken" class="soft">
+  <div class="wrap two-col">
+    <div>
+      <h2>Herken je dit?</h2>
+      <p class="intro">Een aanvraag in je WhatsApp, een in je mail, een via je website en nog een gemiste oproep. Alles staat ergens anders, en jij moet het allemaal onthouden.</p>
+    </div>
+    <div>
+      <ul class="quotes">
+        <li>"Waar had die klant ook alweer zijn adres gestuurd?"</li>
+        <li>"Die aanvraag via Facebook heb ik pas na een week gezien."</li>
+        <li>"Ik heb drie apps open om te zien wat ik vandaag moet doen."</li>
+      </ul>
+      <p class="quotes-end">Zoeken kost tijd, en een aanvraag die blijft liggen kost je een klus.</p>
+    </div>
+  </div>
+</section>
+
+<section id="wat">
+  <div class="wrap dash-what">
+    <div>
+      <h2>Wat je in het dashboard ziet</h2>
+      <p class="intro">Eén scherm met alles wat je vandaag nodig hebt. We bepalen samen met jou wat erop komt.</p>
+      <ul class="checks checks-1">
+        <li>Alle aanvragen in één lijst, met waar ze vandaan komen</li>
+        <li>Per aanvraag de status: nieuw, offerte maken, terugbellen of ingepland</li>
+        <li>Je agenda van vandaag, met tijden en adressen</li>
+        <li>Wat nog blijft liggen springt eruit</li>
+      </ul>
+    </div>
+    <div class="dash-mock" aria-label="Voorbeeld van het Vaktijd Dashboard" role="img">
+      <div class="dm-bar"><span class="dm-dot"></span><b>Goedemorgen, Mark</b><span class="dm-date">di 10 nov</span></div>
+      <div class="dm-body">
+        <div class="dm-title">Aanvragen <span class="dm-count">5</span></div>
+        <div class="dm-row"><span class="dm-src dm-wa">WhatsApp</span><span class="dm-main"><b>Fam. Jansen</b><small>Lekkende kraan</small></span><span class="dm-status dm-ok">Ingepland</span></div>
+        <div class="dm-row"><span class="dm-src dm-mail">Mail</span><span class="dm-main"><b>P. de Vries</b><small>Dakkapel 3 m</small></span><span class="dm-status dm-warn">Offerte maken</span></div>
+        <div class="dm-row"><span class="dm-src dm-web">Website</span><span class="dm-main"><b>M. Bakker</b><small>Badkamer verbouwen</small></span><span class="dm-status">Nieuw</span></div>
+        <div class="dm-row"><span class="dm-src dm-fb">Facebook</span><span class="dm-main"><b>Sanne K.</b><small>Schuurtje</small></span><span class="dm-status">Nieuw</span></div>
+        <div class="dm-row"><span class="dm-src dm-tel">Gemist</span><span class="dm-main"><b>06-…</b><small>3× gebeld</small></span><span class="dm-status dm-alert">Terugbellen</span></div>
+        <div class="dm-title dm-title-2">Agenda vandaag</div>
+        <div class="dm-row dm-agenda dm-now"><span class="dm-time">08:00</span><span class="dm-main"><b>Lekkende kraan</b><small>Kerkstraat 12, Someren</small></span></div>
+        <div class="dm-row dm-agenda"><span class="dm-time">11:30</span><span class="dm-main"><b>Dakkapel opmeten</b><small>Molenweg 4, Asten</small></span></div>
+        <div class="dm-row dm-agenda"><span class="dm-time">15:00</span><span class="dm-main"><b>Badkamer bespreken</b><small>Dorpsstraat 31, Lierop</small></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="waarom" class="soft">
+  <div class="wrap">
+    <div class="values-head">
+      <h2>Waarom het belangrijk is voor ondernemers</h2>
+      <p class="intro">Als vakman verdien je je geld op de klus, niet achter je telefoon. Hoe minder je hoeft te zoeken, hoe meer tijd en rust je overhoudt.</p>
+    </div>
+    <div class="values">
+      <article class="value">
+        <span class="value-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg></span>
+        <h3>Geen aanvraag meer kwijt</h3>
+        <p>Elke aanvraag komt op dezelfde plek, hoe de klant je ook benadert. Niets raakt meer ondergesneeuwd.</p>
+      </article>
+      <article class="value value-accent">
+        <span class="value-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg></span>
+        <h3>Sneller reageren, meer klussen</h3>
+        <p>Klanten vragen vaak bij meerdere vakmensen tegelijk. Wie als eerste reageert, maakt de meeste kans op de opdracht.</p>
+      </article>
+      <article class="value">
+        <span class="value-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span>
+        <h3>Rust in je hoofd</h3>
+        <p>Je hoeft niets meer te onthouden of op te zoeken. Je ziet meteen waar je vandaag moet zijn en wat er nog open staat.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="hoe">
+  <div class="wrap">
+    <h2>Hoe het werkt</h2>
+    <p class="intro">Geen nieuw systeem om te leren. We koppelen wat je al gebruikt.</p>
+    <ol class="steps">
+      <li><h3>Kennismaking</h3><p>We kijken samen waar jouw aanvragen binnenkomen en hoe je nu je afspraken bijhoudt.</p></li>
+      <li><h3>Koppelen</h3><p>We koppelen je mail, website, WhatsApp, social media en agenda aan het dashboard.</p></li>
+      <li><h3>Alles komt binnen</h3><p>Nieuwe aanvragen verschijnen vanzelf in je overzicht, met de juiste status.</p></li>
+      <li><h3>Jij werkt het af</h3><p>Je ziet wat er moet gebeuren en pakt het op. Wij blijven bereikbaar als er iets is.</p></li>
+    </ol>
+    <p class="note"><strong>Combineer het met automatiseringen.</strong> Laat aanvragen automatisch bevestigen, offertes klaarzetten of klanten herinneren aan hun afspraak. <a href="automatiseringen.html">Bekijk de automatiseringen</a>.</p>
+  </div>
+</section>
+
+<section id="vragen" class="soft">
+  <div class="wrap faq-wrap">
+    <h2>Veelgestelde vragen</h2>
+    <div class="faq">
+      <details>
+        <summary>Moet ik een nieuw programma leren?</summary>
+        <p>Nee. Je blijft werken met de programma's die je al hebt. Het dashboard zet alleen alles op één plek, zodat je niet meer hoeft te zoeken.</p>
+      </details>
+      <details>
+        <summary>Welke kanalen kunnen erin?</summary>
+        <p>Denk aan je mail, het formulier op je website, WhatsApp, berichten via Facebook of Instagram en je agenda. Bij de kennismaking kijken we welke kanalen jij gebruikt.</p>
+      </details>
+      <details>
+        <summary>Is het dashboard voor iedereen hetzelfde?</summary>
+        <p>Nee, we maken het op maat. Een schilder heeft iets anders nodig dan een installateur of hovenier. We zetten erop wat voor jou belangrijk is.</p>
+      </details>
+      <details>
+        <summary>Wat kost het?</summary>
+        <p>Dat hangt af van wat je wilt koppelen. Je krijgt vooraf een voorstel met een vaste prijs, dus je weet waar je aan toe bent. De kennismaking is gratis.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="wrap cta-inner">
+    <div>
+      <h2>Ook alles op één plek?</h2>
+      <p>Plan een gratis kennismaking, dan laten we je zien hoe het werkt.</p>
+    </div>
+    <a href="./#contact" class="btn btn-green">Plan een gratis kennismaking</a>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-foot">
+  <div class="wrap foot-grid">
+    <div class="foot-brand">
+      <span class="wordmark">Vak<span>tijd</span></span>
+      <p>Minder administratie, meer tijd voor je vak. Automatiseringen op maat voor kleine bedrijven.</p>
+    </div>
+    <div>
+      <h3>Contact</h3>
+      <ul>
+        <li><a href="mailto:info@vaktijd.nl">info@vaktijd.nl</a></li>
+        <li>Beau: <a href="mailto:beau@vaktijd.nl">beau@vaktijd.nl</a></li>
+        <li>Sander: <a href="mailto:sander@vaktijd.nl">sander@vaktijd.nl</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3>Locatie</h3>
+      <ul>
+        <li>Someren</li>
+        <li>Noord-Brabant</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Pagina's</h3>
+      <ul>
+        <li><a href="./">Home</a></li>
+        <li><a href="automatiseringen.html">Automatiseringen</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="werkwijze.html">Werkwijze</a></li>
+        <li><a href="over-ons.html">Over ons</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="wrap foot-bottom">© 2026 Vaktijd</div>
+</footer>
+
+<script src="main.js" defer></script>
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "0d599b2159404e5b96f59f497e83c845"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
